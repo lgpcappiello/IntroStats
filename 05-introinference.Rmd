@@ -1,0 +1,359 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Introduction to Confidence Intervals
+
+## Chapter Overview
+
+This chapter will bridge the gap between our discussion on the normal distribution and our first forays into statistical inference. As it turns out, much of the statistical inference we will use relies on the normal distribution and the t-distribution, which we will introduce in this chapter. We begin our study of statistical inference by learning about confidence intervals.
+
+**Chapter Learning Objectives/Outcomes**
+
+1. Find the distribution of a sample mean.
+2. Estimate probabilities for a sample mean.
+3. Calculate and interpret confidence intervals for a population mean.
+4. Use the standard normal and t-distributions to find critical values.
+
+**R Objectives**
+
+1. Find z and t critical values.
+2. Generate complete confidence intervals for a population mean. 
+
+This chapter's outcomes correspond to course outcome (6) apply statistical inference techniques of parameter estimation such as point estimation and confidence interval estimation and (7) apply techniques of testing various statistical hypotheses concerning population parameters.
+
+## Sampling Distributions
+
+### Sampling Error
+
+We want to use a sample to learn something about a population, but no sample is perfect! **Sampling error** is the error resulting from using a sample to estimate a population characteristic. 
+
+If we use a sample mean $\bar{x}$ to estimate $\mu$, chances are that $\bar{x}\ne\mu$ (they might be close but... they might not be!). We will consider
+
+- How close *is* $\bar{x}$ to $\mu$?
+- What if we took many samples and calculated $\bar{x}$ many times? 
+  - How would that relate to $\mu$? 
+  - What would be the distribution of these values?
+
+The distribution of a statistic (across all possible samples of size $n$) is called the **sampling distribution**. We will focus primarily on the distribution of the sample mean. 
+
+For a variable $x$ and given a sample size $n$, the distribution of $\bar{x}$ is called the **sampling distribution of the sample mean** or the **distribution of $\boldsymbol{\bar{x}}$**.
+
+> *Example*: Suppose our population is the five starting players on a particular basketball team. We are interested in their heights (measures in inches). The full population data is
+>
+> | Player | A | B | C | D | E | 
+> | :- | :-: | :-: | :-: | :-: | :-: | 
+> | Height | 76 | 78 | 79 | 81 | 86 | 
+>
+> The population mean is $\mu=80$. Consider all possible samples of size $n=2$:
+>
+> | Sample | A,B | A,C | A,D | A,E | B,C | B,D | B,E | C,D | C,E | D,E | 
+> | :- | :-: | :-: | :-: | :-: | :-: |  :-: |  :-: |  :-: |  :-: |  :-: | 
+> | $\bar{x}$ | 77 | 77.5 | 78.5 | 81.0 | 78.5 | 79.5 | 82.0 | 80.0 | 82.5 | 83.5 | 
+>
+> There are 10 possible samples of size 2. Of these samples, 10\% have means exactly equal to $\mu$ (for a *random* sample of size 2, you'd have a 10\% chance to find $\bar{x}=\mu$... and a 90\% chance not to!). 
+
+In general, the larger the sample size, the smaller the sampling error tends to be in estimating $\mu$ using $\bar{x}$. 
+
+In practice, we have one sample and $\mu$ is unknown. We also have limited resources to collect data, so it may not be feasible to collect a very large sample. 
+
+The mean of the distribution of $\bar{x}$ is $\mu_{\bar{X}}=\mu$ and the standard deviation is $\sigma_{\bar{X}}=\sigma/\sqrt{n}$. We refer to the standard deviation of a sampling distribution as **standard error**. (Note that this standard error formula is built for very large populations, so it will not work well for our basketball players. This is okay! We usually work with populations so large that we treat them as "infinite".)
+
+> *Example*: The mean living space for a detatched single family home in the United States is 1742 ft$^2$ with a standard deviation of 568 square feet. (Does that mean seem huge to anyone else??) For samples of 25 homes, determine the mean and standard error of $\bar{x}$. 
+>
+> Using our formulae: $$\mu_{\bar{X}} = \mu = 1742$$ and $$\sigma_{\bar{X}} = \frac{\sigma}{\sqrt{n}} = \frac{568}{\sqrt{25}} = 113.6.$$
+
+### The Central Limit Theorem
+
+Consider the setting where $X$ is Normal($\mu$, $\sigma$). The plots below show (A) a random sample of 1000 from a Normal(100, 25) distribution and (B) the approximate sampling distribution of $\bar{X}$ when X is Normal(100, 25).
+
+```{r}
+set.seed(0)
+par(mfrow=c(1,2))
+dat <- matrix(rnorm(1000000,100,25), nrow=1000, byrow=TRUE)
+hist(dat[1,], freq=FALSE, main="Distribution of x", xlab="x", ylab="", yaxt="n")
+hist(rowMeans(dat), freq=FALSE, main="Distribution of x-bar", xlab="x-bar", ylab="", yaxt="n")
+```
+
+Notice how the x-axis changes from one plot to the next.
+
+In fact, if $X$ is Normal($\mu$, $\sigma$), then $\bar{X}$ is Normal($\mu_{\bar{X}}=\mu$, $\sigma_{\bar{X}}=\sigma/\sqrt{n}$). 
+
+Surprisingly, we see a similar result for $\bar{X}$ even when $X$ is not normally distributed!
+
+<center><font size='4'><b>Central Limit Theorem</b></font></center>
+
+For relatively large sample sizes, the random variable $\bar{X}$ is approximately normally distributed *regardless of the distribution of* $X$: $$\bar{X}\text{ is Normal}(\mu_{\bar{X}}=\mu, \sigma_{\bar{X}}=\sigma/\sqrt{n}).$$
+
+Notes
+
+- This approximation improves with increasing sample size.
+- In general, "relatively large" means sample sizes $n \ge 30$. 
+
+## Developing Confidence Intervals
+
+Recall: A **point estimate** is a single-value estimate of a population parameter. We say that a statistic is an **unbiased estimator** if the mean of its distribution is equal to the population parameter. Otherwise, it is a **biased estimator**. 
+
+*Comment*: Remember how our formula for sample variance, the "mean squared deviance" divides by $n-1$ instead of $n$? We do this so that $s$ is an *unbiased* estimate of $\sigma$. 
+
+Ideally, we want estimates that are unbiased with small standard error. For example, a sample mean (unbiased) with a large sample size (results in smaller standard error). 
+
+Point estimates are useful, but they only give us so much information. The variability of an estimate is also important!
+
+> *Example* Think about estimating what tomorrow's weather will be like. If it's May in Sacramento, the average high temperature is 82 degrees Fahrenheit, but it's not uncommon to have highs anywhere from 75 to 90! Since the highs are so *variable*, it's hard to be confident using 82 to predict tomorrow's weather. 
+>
+> On the flip side, think about July in Phoenix. The average high is 106 degrees Fahrenheit. In Phoenix, it's uncommon to have a July day with a high below 100. Since the highs are *not variable*, you could feel pretty confident using 106 to predict tomorrow's weather. 
+
+Take a look at these two boxplots:
+
+```{r}
+set.seed(0)
+dat <- c(rnorm(100,0,0.5), runif(100,-5,5))
+grp <- c(rep(1,100),rep(2,100))
+boxplot(dat~grp, ylab="", xlab="")
+```
+
+Both samples are size $n=100$ and have $\bar{x}=0$, which would be our point estimate for $\mu$... but Variable 1 has a standard deviation of $\sigma=0.5$ and Variable 2 has standard deviation $\sigma=5$. As a result, we can be more confident in our estimate of the population mean for Variable 1 than for Variable 2.
+
+We want to formalize this idea of confidence in our estimates. A **confidence interval** is an interval of numbers based on the point estimate of the parameter. Say we want to be 95\% confident about a statement. In Statistics, this means that we have arrived at our statement using a method that will give us a correct statement 95\% of the time. 
+
+Our best point estimate for $\mu$ (based on a random sample) is $\bar{x}$, so that value will make up the center (or midpoint) of the interval. To create an interval around $\bar{x}$, we will construct what is called the **margin of error**. We will use the variability of the data along with some normal distribution properties. This will look like $$z\times\frac{\sigma}{\sqrt{n}}$$ The value $z$ will come from the normal distribution and will be based on how confident we want to be, e.g., 95% confident.
+
+Putting everything together, the 95% confidence interval is $$\left(\bar{x} - z_*\frac{\sigma}{\sqrt{n}}, \bar{x} + z_*\frac{\sigma}{\sqrt{n}}\right)$$ where $z_* = 1.96$. The value $1.96$ is chosen because $(-1.96 < Z < 1.96) = 0.95$ (this is what makes it a 95% confidence interval!).
+
+*Note*: A more detailed mathematical explanation of how we get this interval is available in Appendix C.
+
+### Interpreting a Confidence Interval
+
+To interpret a confidence interval, we need to think back to our definition of probability as "the proportion of times an event would occur if the experiment were run infinitely many times". In the confidence interval case, if an experiment is run infinitely many times, the true value of $\mu$ will be contained in 95\% of the intervals. 
+
+```{r}
+contains <- function(l,u,m){
+  if(l < m & m < u) return(TRUE)
+  else return(FALSE)
+}
+plot_ci <- function(lo, hi, m){
+  par(mar=c(2, 1, 1, 1), mgp=c(2.7, 0.7, 0))
+  k <- 100
+  ci.max <- max(rowSums(matrix(c(-1*lo,hi),ncol=2)))
+
+  xR <- m + ci.max*c(-1, 1)
+  yR <- c(0, 41*k/40)
+
+  plot(xR, yR, type='n', xlab='', ylab='', axes=FALSE)
+  abline(v=m, lty=2, col='#00000088')
+  axis(1, at=m, paste("mu = ",round(m,4)), cex.axis=1.15)
+  #axis(2)
+  for(i in 1:k){
+    x <- mean(c(hi[i],lo[i]))
+	  ci <- c(lo[i],hi[i])
+	  if(contains(lo[i],hi[i],m)==FALSE){
+		  col <- "#F05133"
+		  points(x, i, cex=1.4, col=col)
+#		  points(x, i, pch=20, cex=1.2, col=col)
+		  lines(ci, rep(i, 2), col=col, lwd=5)
+	  }
+	  col <- 1
+  	points(x, i, pch=20, cex=1, col=col)
+	  lines(ci, rep(i, 2), col=col)
+  }
+}
+
+set.seed(0)
+population <- rnorm(1000000,80,25)
+samp_mean <- rep(NA, 100)
+samp_sd <- rep(NA, 100)
+n <- 60
+for(i in 1:100){
+  samp <- sample(population, n) # obtain a sample of size n = 60 from the population
+  samp_mean[i] <- mean(samp)    # save sample mean in ith element of samp_mean
+  samp_sd[i] <- sd(samp)        # save sample sd in ith element of samp_sd
+}
+cv <- -qnorm(0.05/2)
+lower_vector <- samp_mean - cv * samp_sd / sqrt(n) 
+upper_vector <- samp_mean + cv * samp_sd / sqrt(n)
+plot_ci(lower_vector, upper_vector, 80)
+```
+
+The graphic above shows 95\% confidence intervals for 100 samples of size $n=60$ drawn from a population with mean $\mu=80$ and standard deviation $\sigma=25$. Each sample's confidence interval is represented by a horizontal line. The dot in the middle of each is the sample mean. When a confidence interval does *not* capture the population mean $\mu$, the line is printed in red. Based on this concept of repeated sampling, we would expect about 95\% of these intervals to capture $\mu$. In fact, 96 of the 100 intervals capture $\mu$. 
+
+Finally, when you interpret a confidence interval, it is important to do so in the context of the problem.
+
+> *Example* The preferred keyboard height for typists is approximately normally distributed with $\sigma=2.0$. A sample of size $n=31$, resulted in a mean prefered keyboard height of $80 cm$. Find and interpret a 95\% confidence interval for keyboard height.
+>
+> The interval is $$\bar{x} \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}} = 80.0 \pm 1.96\times\frac{2.0}{\sqrt{31}} = 80.0 \pm 0.70 = (79.3, 80.7).$$ Interpretation:We can be 95\% confident that the mean preferred keyboard height for typists is between 79.3cm and 80.7cm. 
+
+Notice that I kept the interpretation simple! That's okay - just be sure you are *also* able to explain what it means to be 95\% confident (using the concept of repeated sampling).
+
+Common mistakes:
+
+- It is NOT accurate to say that "the probability that $\mu$ is in the confidence interval is 0.95". The parameter $\mu$ is some fixed quantity and it's either in the interval or it isn't. 
+- We are NOT "95\% confident that $\bar{x}$ is in the interval". The value $\bar{x}$ is some known quantity and it's always in the interval. 
+
+### Exercises
+
+1. Suppose I took a random sample of 50 Sac State students and asked about their SAT scores and found a mean score of 1112. Prior experience with SAT scores in the CSU system suggests that SAT scores are well-approximated by a normal distribution with standard deviation known to be 50. 
+    a. Find a 95\% confidence interval for Sac State SAT scores. 
+    b. Interpret your interval in the context of the problem. 
+    c. What is the width of your interval? If you want a narrower interval, what could you do? 
+
+## Other Levels of Confidence
+
+While the 95\% confidence interval is common in research, there's nothing inherently special about it. You could calculate a 90\%, a 99\%, or - if you're feeling spicy - something like a 43.8\% confidence interval. These numbers are called the **confidence level** and they represent the proportion of times that the parameter will fall in the interval (if we took many samples).
+
+The 100(1-$\alpha$)\% confidence interval for $\mu$ is given by $$\bar{x}\pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}}$$ where $z_{\alpha/2}$ is the z-score associated with the $[1-(\alpha/2)]$th percentile of the standard normal distribution. The value $z_{\alpha/2}$ is called the **critical value** ("c.v." on the plot, below). 
+
+```{r}
+x <- seq(-3,3,length.out=1000)
+y <- dnorm(x)
+x1 <- -3; x2 <- -qnorm(0.85); x3 <- qnorm(0.85); x4 <- 3
+x.coord <- c(x[x > x1 & x < x2])
+y.coord <- y[x > x1 & x < x2]
+x.coord2 <- c(x[x > x3 & x < x4])
+y.coord2 <- y[x > x3 & x < x4]
+plot(x,y,type='l', xaxt='n', yaxt='n', ylab="",xlab="", ylim=c(-0.02,max(y)+0.01)) #
+abline(h=0); abline(v=1100)
+polygon(x=x.coord, y= c(0, y.coord[2:(length(y.coord)-1)], 0), col="mistyrose")
+polygon(x=x.coord2, y= c(0, y.coord2[2:(length(y.coord)-1)], 0), col="mistyrose")
+text(-1.6,0.03,"Area = a/2"); text(1.6,0.03,"Area = a/2"); text(0,0.1,"Area = 1-a")
+text(x2, 0.-0.015, "-c.v."); text(x3, -0.015, "+c.v.")
+```
+
+<center><font size='4'><b>Common Critical Values</b></font></center>
+
+| Confidence Level | $\alpha$ | Critical Value, $z_{\alpha/2}$ |
+| :-: | :-: | :-: |
+| 90\% | 0.10 | 1.645 |
+| 95\% | 0.05 | 1.96 | 
+| 98\% | 0.02 | 2.326 |
+| 99\% | 0.01 | 2.575 | 
+
+### R: Finding Critical Values {-}
+
+We can find critical values in R using the same command we used to find percentiles: `qnorm`. Recall that $z_{\alpha/2}$ is the z-score associated with the $[1-(\alpha/2)]$th percentile of the standard normal distribution. So for a $(1-\alpha)100\%$ confidence interval, we need to find the value of $1-\alpha/2$ to input into the `qnorm` command. 
+
+For example, to find $z_{\alpha/2}$ for a 93\% confidence interval, we would use $$(1-\alpha)100\% = 93\%$$ to solve for $\alpha$ and get $\alpha = 0.07$. Then we need the $[1-(\alpha/2)]$th percentile: $$1-\frac{\alpha}{2} = 1 - \frac{0.07}{2} = 0.965$$ Finally, we enter this value into the `qnorm` command:
+
+```{r echo=TRUE}
+qnorm(0.965)
+```
+
+and the critical value for a 93\% confidence interval is $z_{\alpha/2}=1.812$. 
+
+### Breaking Down a Confidence Interval
+
+Consider $$\left(\bar{x}- z_{\alpha/2}\frac{\sigma}{\sqrt{n}}, \quad \bar{x} + z_{\alpha/2}\frac{\sigma}{\sqrt{n}}\right)$$ The key values are
+
+- $\bar{x}$, the sample mean
+- $\sigma$, the population standard deviation
+- $n$, the sample size
+- $z_{\alpha/2}$, the critical value $$P(Z > z_{\alpha/2}) = \frac{\alpha}{2}$$
+
+The value of interest is $\mu$, the (unknown) population mean; the confidence interval gives us a reasonable range of values for $\mu$.
+
+In addition, the formula includes 
+
+- The standard error, $\frac{\sigma}{\sqrt{n}}$
+- The margin of error, $z_{\alpha/2}\frac{\sigma}{\sqrt{n}}$
+
+### Confidence Level, Precision, and Sample Size
+
+If we can be 99\% confident (or even higher), why do we tend to "settle" for 95\%?? Take a look at the common critical values (above) and the confidence interval formula $$\bar{x} \pm z_{\alpha/2}\frac{\sigma}{\sqrt{n}}.$$ What will higher levels of confidence do to this interval? Think back to the intuitive interval width explanation with the weather. Mathematically, the same thing will happen: the interval will get wider! And remember, a narrow interval is a more informative interval. There is a trade off here between interval width and confidence. In general, the scientific community has settled on 95\% as a compromise between the two, but different fields may use different levels of confidence. 
+
+There is one other thing we can control in the confidence interval: the sample size $n$. One strategy is to specify the confidence level and the maximum acceptable interval width and use these to determine sample size. We know that $$\text{interval width} \ge 2z_{\alpha/2}\frac{\sigma}{\sqrt{n}}$$ (Note: I use $\ge$ because $2z_{\alpha/2}\frac{\sigma}{\sqrt{n}}$ is the *maximum* interval width - we would still be happy if this value turned out to be smaller!) Letting interval width equal $w$, we can solve for $n$: $$ n \ge \left(2z_{\alpha/2}\frac{\sigma}{w}\right)^2$$ Alternately, we may specify a maximum margin of error $m$ instead: $$ n \ge \left(z_{\alpha/2}\frac{\sigma}{m}\right)^2$$ Once we've done this calculation, we need a whole number for $n$. Since $n \ge$ something, we will *always round up*.
+
+> *Example* Suppose we want a 95\% confidence interval for the mean of a normally distributed population with standard deviation $\sigma=10$. It is important for our margin of error to be no more than 2. What sample size do we need?
+> 
+> Using the formula for sample size with a desired margin of error, I can plug in $z_{0.05/2}=1.96$, $m=2$ and $\sigma=10$: $$n = \left(1.96\times\frac{10}{2}\right)^2 = 96.04$$. So (rounding up!) I need a sample size of *at least 97*. 
+
+A few comments:
+
+- As desired width/margin of error decreases, $n$ will increase. 
+- As $\sigma$ increases, $n$ will also increase. (More population variability will necessitate a larger sample size.)
+- As confidence level increases, $n$ will also increase.
+
+### Exercises
+
+1. In the previous section, you worked with a random sample of 50 Sac State students with mean SAT score 1112. Prior experience with SAT scores in the CSU system suggests that SAT scores are well-approximated by a normal distribution with standard deviation known to be 50. Calculate a
+    a. 98\% confidence interval.
+    b. 90\% confidence interval.
+    c. Interpret each interval in the context of the problem. Comment on how the intervals change as you change the confidence level.
+    d. Find the sample size required for a 98% confidence interval with maximum margin of error 10.
+
+## Confidence Intervals for a Mean
+
+In practice, the value of $\sigma$ is almost never known... but we know that we can estimate $\sigma$ using $s$. Can we plug in $s$ for $\sigma$? Sometimes!
+
+Remember the Central Limit Theorem (Section 5.1)? For samples of size $n \ge 30$, $\bar{X}$ will be approximately normal even if $X$ isn't. In this case, we can plug in $s$ for $\sigma$: $$\bar{x} \pm z_{\alpha/2}\frac{s}{\sqrt{n}}.$$
+
+That setting is pretty straightforward! Now we need to consider the setting where $n < 30$, which will require a bit of additional work. 
+
+### The T-Distribution
+
+Enter: the t-distribution. If $$Z = \frac{\bar{X}-\mu}{\sigma/\sqrt{n}}$$ has a standard normal distribution (for $X$ normal or $n\ge30$), the slightly modified $$T = \frac{\bar{X}-\mu}{s/\sqrt{n}}$$ has what we call the **t-distribution** with $n-1$ **degrees of freedom** (even when $n < 30$!). The only thing we need to know about degrees of freedom is that $\text{df}=n-1$ is the t-distribution's only parameter.
+
+```{r}
+x <- seq(-4,4,length.out=1000)
+y <- dnorm(x)
+t1 <- dt(x, 30)
+t2 <- dt(x, 10)
+t3 <- dt(x, 5)
+t4 <- dt(x, 2)
+t5 <- dt(x, 1)
+plot(x,y,type='l', lwd=2, lty=2, yaxt='n', ylab="",xlab="") 
+points(x,t1,type='l',lwd=2, col='red') 
+points(x,t2,type='l',lwd=2, col='blue') 
+points(x,t3,type='l',lwd=2, col='darkgreen')
+points(x,t4,type='l',lwd=2, col='purple')
+points(x,t5,type='l',lwd=2, col='darkorange')
+legend(1.4,0.4,legend=c("Standard Normal","T, df=30","T, df=10","T, df=5","T, df=2","T, df=1"),
+       col=c('black','red','blue','darkgreen','purple','darkorange'), lwd=2, lty=c(2,1,1,1,1,1), box.lty=0)
+```
+
+The t-distribution is symmetric and always centered at 0. When $n\ge30$, the t-distribution is approximately equivalent to the standard normal distribution. For smaller sample sizes, the t-distribution has more area in the tails (and therefore less area in the center of the distribution). Therefore, we can always use t confidence intervals (even if $n$ is large) because the critical values are essentially equivalent between the t and standard normal distributions for large values of $n$. This is usually what happens in practice.
+
+In practice, we plug in $s$ for $\sigma$ and almost always use a t critical value (instead of a z critical value): $t_{\text{df}, \, \alpha/2}$. The t critical value is the $[1- \alpha/2]$th percentile of the t-distribution with $n-1$ degrees of freedom. The resulting 95\% confidence interval is $$\bar{x} \pm t_{\text{df}, \, \alpha/2}\frac{s}{\sqrt{n}}.$$ 
+
+You may use the applet, <a href="http://www.rossmanchance.com/applets/2021/tcalc/tCalc.htm" target="blank">Rossman and Chance t Probability Calculator</a> to find t critical values. For this applet, enter the degrees of freedom $n-1$ next to "df". Then check the top box under "t-value probability" and make sure the inequality is clicked to ">" . Enter the value of $\alpha/2$ for the probability. Click anywhere else on the page and the applet will automatically fill in the box under "t-value". This is your t critical value. 
+
+### R: T Critical Values {-}
+
+To find a t critical value, we will again use R, now with the command `qt`. (Notice that this is similar to the command for the standard normal distribution, but instead of "norm" for normal it has "t" for the t-distribution.) The `qt` command takes in the following:
+
+- `p`, the probability
+- `df`, the degrees of freedom
+
+For example, for a 98\% interval with a sample size of 15, $$100(1-\alpha) = 98 \implies \alpha=0.02$$ Then $1-\alpha/2 = 0.99$ and $\text{df}=15-1=14$.
+
+```{r echo=TRUE}
+qt(p = 0.99, df = 14)
+```
+
+which gives the t critical value $t_{14,\alpha/2} = 2.625$. 
+
+## R: Confidence Intevals for a Mean {-}
+
+To generate complete confidence intervals for a mean in R, we will use the command `t.test`. The two arguments we will use for confidence interval generation are 
+
+- `x`: the variable that contains the data we want to use to construct a confidence interval.
+- `conf.level`: the desired confidence level
+
+We will continue to use the `Loblolly` pine tree data. 
+
+```{r, echo=TRUE, message=F}
+attach(Loblolly)
+```
+
+In this case, the variable of interest is `x = height` and the desired confidence level is `conf.level = 0.95`. We our confidence interval using the following command:
+
+```{r, echo=TRUE}
+t.test(x = height, conf.level = 0.95)
+```
+
+R printed more information than we know what to do with right now. That's ok! We will get to it later. Right now, focus your attention to where it says "95 percent confidence interval:" and the line below that, which gives the interval (27.88, 36.85). At the bottom, it also provides the sample mean height of 32.36 feet. Based on the R output, we can say that we are 95\% confident that the true mean height of the loblolly pines is between 27.88 and 36.85 feet (assuming the researchers took a random sample of trees).
+
+```{r, echo=TRUE, message=F}
+detach(Loblolly)
+```

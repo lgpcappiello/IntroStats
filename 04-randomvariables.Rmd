@@ -1,0 +1,524 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Random Variables
+
+## Chapter Overview
+
+In previous chapters, we introduced the idea of variables and examined their distributions. We also began our discussion on probability theory. Now, we extend these concepts into what are called random variables. We will introduce the concept of random variables in general and will discuss a specific type of distribution - the binomial distribution. Then we will discuss a continuous probability distribution, the normal distribution. The normal distribution will provide a foundation for much of the inference we will complete throughout the rest of this course.
+
+**Chapter Learning Objectives/Outcomes**
+
+1. Discuss discrete random variables using key terminology.
+2. Express cumulative probabilities using probability notation.
+3. Calculate the expected value and standard deviation of a discrete random variable.
+4. Calculate binomial probabilities.
+5. Convert normal distributions to standard normal distributions.
+6. Calculate probabilities for a normal distribution using area under the curve.
+7. Approximate binomial probabilities using the normal curve.
+
+**R Objectives**
+
+1. Calculate binomial probabilities.
+2. Find cumulative probabilities for the standard normal distribution. 
+3. Find percentiles.
+4. Use R as a simple calculator.
+
+This chapter's outcomes correspond to course outcomes (4) use the binomial distribution as a model for discrete variables and (5) use the normal distribution as a model for continuous variables.
+
+## Discrete Random Variables
+
+A **random variable** is a quantitative variable whose values are based on chance. By "chance", we mean that you can't *know* the outcome before it occurs. 
+
+A **discrete random variable** is a random variable whose possible values can be listed. 
+
+Notation:
+
+- $x$,$y$,$z$ (lower case letters) denote variables.
+- $X$, $Y$, $Z$ (upper case letters) denote *random* variables.
+
+In contrast to events, where we usually used letters toward the start of the alphabet, (random) variables are typically denoted by letters from the end of the alphabet.
+
+- $\{X=x\}$ denotes the event that the random variable $X$ equals $x$.
+- $P(X=x)$ denotes the probability that the random variable $X$ equals $x$. 
+
+Recall: a probability distribution is a list of all possible values and their corresponding probabilities. (See Section 3.3 for a refresher.) A **probability histogram** is a histogram where the heights of the bars correspond to the probability of each value. (This is very similar to a relative frequency histogram!) For discrete random variables, each "bin" is one of the listed values. 
+
+> *Example*: 
+>
+> | Number of Siblings, $x$ | 0 | 1 | 2 | 3 | 4 |
+> | :- | :-: | :-: | :-: | :-: | :-: | 
+> | **Probability**, $P(X=x)$ | 0.200 | 0.425 | 0.275 | 0.075 | 0.025 | 
+>
+> (Assume for the sake of the example that no one has more than 4 siblings.)
+
+```{r}
+barplot(c(0.2,0.425,0.275,0.075,0.025), space=0, col="lightblue",
+        names.arg = c("0","1","2","3","4"),
+        xlab="Number of Siblings",
+        ylab = "Probability")
+```
+
+Interpretation: in a large number of independent observations of a random variable $X$, the proportion of times each possible value occurs will approximate the probability distribution of $X$. 
+
+### The Mean and Standard Deviation
+
+<center><font size='4'><b>Mean of a Discrete Random Variable</b></font></center>
+The mean of a discrete random variable $X$ is denoted $\mu_X$. If it's clear which random variable we're talking about, we can drop the subscript and write $\mu$.
+\[
+  \mu_X = \Sigma xP(X=x)
+\]
+where $\Sigma$ denotes "the sum over all values of $x$": $$\Sigma xP(X=x) = x_1P(X=x_1) + x_2P(X=x_2) + \dots + x_nP(X=x_n).$$
+
+The mean of a random variable is also called the **expected value** or **expectation**. Recall that measures of center are meant to identify the most common or most likely, thus the value we can *expect* to see (most often). 
+
+> *Example*: for the Siblings distribution, $$\mu = 0(0.200)+1(0.425)+2(0.275)+3(0.075)+4(0.025)=1.3$$
+> Make sure you understand how we used the formula for $\mu$ and the probability distribution to come up with this number. 
+
+Interpretation: in a large number of independent observations of a random variable $X$, the mean of those observations will approximately equal $\mu$. 
+
+The larger the number of observations, the closer their average tends to be to $\mu$. This is known as the **law of large numbers**. 
+
+> *Example*: Suppose I took a random sample of 10 people and asked how many siblings they have. $$2,2,2,2,1,0,3,1,2,0$$ In my random sample of 10, $\bar{x}=2$, which is a reasonable estimate but not that close to the true mean $\mu=1.3$. 
+>
+> - A random sample of 30 gave me a mean of $\bar{x}=1.53$.
+> - A random sample of 100 gave me a mean of $\bar{x}=1.47$.
+> - A random sample of 1000 gave me a mean of $\bar{x}=1.307$.
+
+We use concepts related to the law of large numbers as a foundation for statistical inference, but note that - although very large samples are nice to have - it's not necessary to take enormous samples all the time. Often, we can come to interesting conclusions with fewer than 30 observations!
+
+<center><font size='4'><b>Standard Deviation of a Discrete Random Variable</b></font></center>
+
+The variance of a discrete random variable $X$ is denoted $\sigma_X^2$ (or $\sigma^2$ if it's clear which variable we're talking about). 
+\[ \sigma_X^2 = \Sigma[(x-\mu_X)^2P(X=x)]\]
+OR
+\[ \sigma_X^2 = \Sigma[x^2P(X=x)]-\mu_X^2\]
+These formulas are *exactly* equivalent and you may use whichever you wish, but note that the second may be a little easier to work with. 
+
+As before, the standard deviation is the square root of the variance: $$\sigma = \sqrt{\sigma^2}$$
+
+> *Example*: Calculate the standard deviation of the Siblings variable. 
+>
+>In general, a table is the best way to keep track of a variance calculation:
+> 
+> | $x$ | $P(X=x)$ | $xP(X=x)$ | $x^2$ | $x^2P(X=x)$ |
+> | :-: | :-: | :-: | :-: | :-: |
+> | 0 | 0.200 | 0 | 0 | 0 |
+> | 1 | 0.425 | 0.425 | 1 | 0.425 | 
+> | 2 | 0.275 | 0.550 | 4 | 1.100 | 
+> | 3 | 0.075 | 0.225 | 9 | 0.675 | 
+> | 4 | 0.025 | 0.100 | 16 | 0.400 | 
+> |  |  | $\mu$ = 1.3 |  | Total = 2.6 |
+>
+> Then the variance is $$\sigma^2 = 2.6 - 1.3^2 = 0.9$$ and the standard deviation is $$\sigma = \sqrt{0.9} = 0.9539.$$
+
+## The Binomial Distribution 
+
+Think back to replication in an experiment. Each replication is what we call a **trial**. We will consider a setting where each trial has two possible outcomes.
+
+> For example, suppose you want to know if a coin is fair (both sides equally likely). You might flip the coin 100 times (thus running 100 trials). Each trial is a flip of the coin with two possible outcomes: heads or tails.
+
+The product of the first $k$ positive integers $(1, 2, 3, \dots)$ is called **k-factorial**, denoted $k!$: $$k! = k \times (k-1) \times\dots\times 3 \times 2 \times 1$$ We define $0!=1$.
+
+> *Example*: $5! = 5 \times 4 \times 3 \times 2 \times 1 = 120$
+
+If $n$ is a positive integer $(1, 2, 3, \dots)$ and $x$ is a nonnegative integer $(0, 1, 2, \dots)$ with $x \le n$, the **binomial coefficient** is $$\binom{n}{x} = \frac{n!}{x!(n-x)!}$$
+
+> *Example*: $$\binom{5}{2} = \frac{5!}{2!(5-2)!} = \frac{5 \times 4 \times 3 \times 2 \times 1}{(2 \times 1)(3 \times 2 \times 1)}$$
+
+Sometimes, we may want to simplify a binomial coefficient *before* taking all of the factorials. Why? Well, $$20! = 2432902008176640000$$ Most calculators will not print this number. Instead, you'll get an error or a rounded version printed using scientific notation. Neither will help you accurately calculate the binomial coefficient. 
+
+> *Example*: $$\binom{20}{17} = \frac{20\times 19\times 18\times 17\times 16\times \dots \times 3\times 2\times 1}{(17\times 16\times \dots \times 3\times 2\times 1)(3\times 2\times 1)}$$ but notice that I can rewrite $20!$ as $20\times 19\times 18\times 17!$, so $$\binom{20}{17} = \frac{20\times 19\times 18\times 17!}{17!(3\times 2\times 1)} = \frac{20\times 19\times 18}{3\times 2\times 1} = \frac{6840}{6} = 1140$$
+
+**Bernoulli trials** are repeated trials of an experiment where:
+
+1. Each trial has two possible outcomes: success and failure.
+2. Trials are independent.
+3. The probability of success (the **success probability**) $p$ remains the same from one trial to the next: $$P(X=\text{success})=p$$
+
+The **binomial distribution** is the probability distribution for the number of successes in a sequence of Bernoulli trials.
+
+Fact: in $n$ Bernoulli trials, the number of outcomes that contain exactly $x$ successes equals the binomial coefficient $\binom{n}{x}$.
+
+<center><font size='4'><b>Binomial Probability Formula</b></font></center>
+
+Let $x$ denote the total number of successes in $n$ Bernoulli trials with success probability $p$. The probability distribution of the random variable $X$ is given by $$P(X=x) = \binom{n}{x}p^x(1-p)^{n-x} \quad\quad x = 0,1,2,\dots,n$$ The random variable $X$ is called a **binomial random variable** and is said to have the **binomial distribution**. Because $n$ and $p$ fully define this distribution, they are called the distribution's **parameters**. 
+
+To find a binomial probability formula:
+
+<ol><li>Check assumptions.</li>
+  <ol type="a">
+  <li>Exactly $n$ trials to be performed.</li>
+  <li>Two possible outcomes for each trial.</li>
+  <li>Trials are independent (each trial does not impact the result of the next)</li>
+  <li>Success probability $p$ remains the same from trial to trial.</li>
+  </ol>
+<li>Identify a "success". Generally, this is whichever of the two possible outcomes we are most interested in.</li>
+<li>Determine the success probability $p$.</li>
+<li>Determine $n$, the number of trials.</li>
+<li>Plug $n$ and $p$ into the binomial distribution formula.</li>
+</ol>
+
+We can also use the binomial probability formula to calculate probabilities like $P(X\le x)$. Notice that we can rewrite this using concepts from the previous chapter $$P(X \le k) = P(X=k \text{ or } X=k-1 \text{ or } \dots  \text{ or } X=2 \text{ or } X=1  \text{ or } X=0)$$ Since $X$ is a discrete random variable, each possible value is *disjoint*. We can use this! $$P(X \le k) = P(X=k) + P(X=k-1) + \dots + P(X=2) + P(X=1) + P(X=0)$$
+
+> *Example*: $P(X \le 3) = P(X=3)+P(X=2)+P(X=1)+P(X=0)$
+
+We can also extend this concept to work with probabilities like $P(a < X \le b)$.
+
+> *Example*: $P(2 < X \le 5)$ 
+>
+> First, notice that if $2 < X \le 5$, then $X$ can be 3, 4, or 5: $$P(2 < X \le 5) = P(X=3)+P(X=4)+P(X=5)$$
+
+> Note: if going from $2 < X \le 5$ to "$X$ can be 3, 4, or 5" doesn't make sense to you, start by writing out the sample space. Suppose $n=10$. Then the sample space for the binomial distribution is $$S = \{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10\}$$ Then I can check any number in this sample space by plugging it in for $X$. So for 1, I can check $2 < 1 \le 5$. Obviously this is not true, so we won't include 1. Checking the number 2, I get $2 < 2 \le 5$. Since 2 < 2 is NOT true, we don't include 2. Etc.
+
+### Mean and Variance
+
+The shape of a binomial distribution is determined by the success probability:
+
+- If $p \approx 0.5$, the distribution is approximately symmetric.
+- If $p < 0.5$, the distribution is right-skewed.
+- If $p > 0.5$, the distribution is left-skewed.
+
+The mean of a binomial distribution is $\mu = np$. The variance is $\sigma^2 = np(1-p)$. 
+
+### Binomial Probabilities in R {-}
+
+When it comes to calculating binomial probabilities, hand calculations can be cumbersome. Fortunately, this is another thing we can do in R!
+
+Approximately 66% of US adults take prescription medications. Find the probability that, in a sample of 100 adults, exactly 65 take prescription drugs. 
+
+We want to find $P(X = 65)$ where $X$ has a binomial distribution with $n=100$ and $p=0.66$. (Take a moment on your own to make sure you can convince yourself that this satisfies the conditions for a binomial setting and that you understand how we got here from the prompt above.) 
+
+Instead of doing this by hand (the larger $n$ is, the more difficult this tends to get!), we will use the `dbinom` command in R. The `dbinom` command takes in the following information:
+
+- `x` the value $x$ takes on in the expression $P(X=x)$
+- `size` the value of $n$
+- `prob` the probability $p$
+
+```{r, echo=T}
+dbinom(x = 65, size = 100, prob = 0.66)
+```
+
+So without doing any hand calculations, I find that $P(X=65) = 0.082$; the probability that exactly 65 of 100 randomly selected US adults take prescription medication is 0.082.
+
+Suppose now we want to find $P(63 < X < 68)$. How can we manage that? We can figure out that this probability includes numbers between 63 and 68, but does not include 63 or 68. In fact, it is the numbers 64 through 67. SO we can break this up as $$ P(63 < X < 68) = P(X=64) + P(X=65)+ P(X=66) + P(X=67) $$
+
+In R, we can get a sequence of whole numbers using the format `a:b`. For example
+
+```{r, echo=T}
+64:67
+```
+
+gives all whole numbers from 64 through 67. 
+
+I can then put this directly into the `dbinom` command! 
+
+```{r, echo=T}
+dbinom(x = 64:67, size = 100, prob = 0.66)
+```
+
+This produces each individual probability $P(X=64)$, $P(X=65)$, $P(X=66)$, and $P(X=67)$. To quickly add these up, I am going to use the `sum` command. Notice that I put the entire `dibnom` command *in the parentheses* of the `sum()`.
+
+```{r, echo=T}
+sum(
+  dbinom(x = 64:67, size = 100, prob = 0.66)
+)
+```
+
+And so $P(63 < X < 68) = 0.324$; the probability that between 64 and 67 (inclusive) US adults in a sample of 100 take prescription medication is 0.324.
+
+## The Normal Distribution 
+
+If we can represent a discrete variable with a probability histogram, what can we do with a continuous variable? 
+
+We represent the shape of a continuous variable using a **density curve**. This is like a histogram, but with a smooth curve:
+```{r}
+set.seed(0)
+X <- rnorm(100)
+hist(X, prob=TRUE, col="grey")# prob=TRUE for probabilities not counts
+lines(density(X, adjust=2), col="darkgreen", lwd=2) 
+```
+
+Properties:
+
+1. The curve is always above the horizontal axis (because probabilities are always nonnegative).
+2. The total area under the curve equals 1.
+
+For a variable with a density curve, the proportion of all possible observations that lie within a specified range equals the corresponding area under the density curve. 
+
+```{r}
+par(mfrow=c(2,2))
+x <- seq(1:100)
+y <- dnorm(x,50,15)
+
+x2 <- 60
+plot(x,y,type='l', xaxt='n', yaxt='n', ylab="",xlab="P(X < c)", ylim=c(-0.003,max(y)+0.001))
+polygon(x=c(x[c(min(x),min(x):x2,x2)]), y= c(0, y[min(x):x2], 0), col="lightblue"); abline(h=0)
+text(x2, 0.-0.002, "c")
+
+x1 <- 30
+plot(x,y,type='l', xaxt='n', yaxt='n', ylab="",xlab="P(X > d)", ylim=c(-0.003,max(y)+0.001))
+polygon(x=c(x[c(x1,x1:max(x),max(x))]), y= c(0, y[x1:max(x)], 0), col="lightblue"); abline(h=0)
+text(x1, 0.-0.002, "d")
+
+x1 <- 25; x2 <- 70
+plot(x,y,type='l', xaxt='n', yaxt='n', ylab="",xlab="P(a < X < b)", ylim=c(-0.003,max(y)+0.001))
+polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="lightblue"); abline(h=0)
+text(x1, 0.-0.002, "a"); text(x2, 0.-0.002, "b")
+```
+
+A **normal curve** is a special type of density curve that has a "bell-shaped" distribution. In fact, all of the density curves I've shown in this section have been normal curves! We say that a variable is **normally distributed** or has a **normal distribution** if its distribution has the shape of a normal curve. 
+
+Why "normal"? Because it appears so often in practice! Lots of things are more common around the average and less common as you get farther from the average: height, amount of sleep people get each night, standardized test scores, etc. (In practice, these things aren't *exactly* normally distributed... instead, they're **approximately normally distributed** - and that's ok.)
+
+Normal distributions...
+
+- are fully determined by parameters mean $\mu$ and standard deviation $\sigma$.
+- are symmetric and centered at $\mu$.
+- have spreads that depend on $\sigma$.
+
+Pay close attention to the horizontal axis and how spread out the densities are in each of the following plots:
+
+```{r}
+par(mfrow=c(2,2))
+x <- seq(-5,5,length.out=100)
+
+y <- dnorm(x,2,1)
+plot(x,y,type='l', xlim=c(-1,5), yaxt='n', ylab="", xlab="Normal(mu = 2, sigma = 1)")
+
+y <- dnorm(x,0,1)
+plot(x,y,type='l', xlim=c(-3,3), yaxt='n', ylab="", xlab="Normal(mu = 0, sigma = 1)")
+
+y <- dnorm(x,0,0.5)
+plot(x,y,type='l', xlim=c(-5,5), yaxt='n', ylab="", xlab="Normal(mu = 0, sigma = 0.5)")
+
+y <- dnorm(x,0,2)
+plot(x,y,type='l', xlim=c(-5,5), yaxt='n', ylab="", xlab="Normal(mu = 0, sigma = 2)")
+```
+
+Notice that the bottom left plot comes to a sharper peak, while the bottom right has a gentler slope. This is what we mean by "spread": the density on the bottom right is the most spread out. 
+
+To check whether a variable is (approximately) normally distributed,
+
+1. Check the histogram to see if it is symmetric and bell-shaped. 
+2. Estimate the parameters: $\mu$ using $\bar{x}$ and $\sigma$ using $s$.
+
+### The Standard Normal Distribution
+
+In order to make normal distributions easier to work with, we will **standardize** them. A **standard normal distribution** is a normal distribution with mean $\mu=0$ and standard deviation $\sigma=1$. We standardize a variable using $$z = \frac{x-\mu}{\sigma}.$$ This is also called a **z-score**. Standardizing using this formula will *always* result in a variable with mean 0 and standard deviation 1 (even if it's not normal!). If $X$ is approximately normal, then the standardized variable $Z$ will have a standard normal distribution. 
+
+Note: when we z-score a variable, we preserve the area under the curve properties! If $X$ is Normal$(\mu,\sigma)$, then $$P(X < c) = P\left(Z < \frac{c - \mu}{\sigma}\right) = P(Z < z).$$
+
+Because z-scores always result in variables with mean 0 and standard deviation 1, they are also very useful for comparing values which are originally on very different scales. 
+
+## Area Under the Standard Normal Curve
+
+Properties:
+
+1. Total area under the curve is 1.
+2. The curve extends infinitely in both directions, never touching the horizontal axis.
+3. Symmetric about 0.
+4. Almost all of the area under the curve is between -3 and 3.
+
+We will think about area under the standard normal curve in terms of **cumulative probabilities** or probabilities of the form $P(Z < z)$. 
+
+We will use the fact that the total area under the curve is 1 to find probabilities like $P(Z > c)$:
+
+```{r}
+x <- seq(1:100)
+y <- dnorm(x,50,15)
+x1 <- 60; x2 <- 60
+plot(x,y,type='l', xaxt='n', yaxt='n', ylab="",xlab="Total area = 1", ylim=c(-0.002, max(y)+0.001)) 
+polygon(x=c(x[c(min(x),min(x):x2,x2)]), y= c(0, y[min(x):x2], 0), col="lightblue")
+polygon(x=c(x[c(x1,x1:max(x),max(x))]), y= c(0, y[x1:max(x)], 0), col="gold")
+text(x=43,y=0.005,"P(Z < c)")
+text(x=68,y=0.005,"P(Z > c)")
+text(x=60,y=-0.0015,"c")
+```
+
+Using the graphic to help visualize, we can see that $$1 = P(Z < c) + P(Z > c)$$ which we can then rewrite as
+$$P(Z > c) = 1-P(Z<c).$$
+
+We can also use this concept to find $P(a < Z < b)$.
+
+```{r}
+x <- seq(1:100)
+y <- dnorm(x,50,15)
+x1 <- 40; x2 <- 60
+plot(x,y,type='l', xaxt='n', yaxt='n', ylab="",xlab="Total area = 1", ylim=c(-0.002, max(y)+0.001)) 
+polygon(x=c(x[c(min(x),min(x):x2,x2)]), y= c(0, y[min(x):x2], 0), col="lightblue")
+polygon(x=c(x[c(x1,x1:max(x),max(x))]), y= c(0, y[x1:max(x)], 0), col="gold")
+polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="mistyrose")
+text(x=32,y=0.005,"P(Z < a)")
+text(x=50,y=0.005,"P(a < Z < b)")
+text(x=68,y=0.005,"P(Z > b)")
+text(x=40,y=-0.0015,"a");text(x=60,y=-0.0015,"b")
+```
+
+Notice that $$1 = P(Z < a) + P(a < Z < b) + P(Z > b),$$ which we can rewrite as $$P(a < Z < b) = 1 - P(Z > b) - P(Z < a)$$ and since we just found that $P(Z > b) = 1 - P(Z < b)$, we can replace $1 - P(Z > b)$ with $P(Z < b)$, and get $$P(a < Z < b) = P(Z < b) - P(Z < a).$$
+
+<center><font size='4'><b>Key Cumulative Probability Concepts</b></font></center>
+
+- $P(Z > c) = 1 - P(Z < c)$
+- $P(a < Z < b) = P(Z < b) - P(Z < a)$
+
+A final note, because the normal distribution is symmetric, $P(X < \mu) = P(X > \mu) = 0.5$. Notice this also implies that, when a distribution is symmetric (and unimodal), the mean and median are the same!
+
+Now that we can get all of our probabilities written as *cumulative* probabilities, we're ready to use software to find the area under the curve!
+
+<center><font size='4'><b>Finding Area Under the Curve: Applets</b></font></center>
+
+One option for finding probabilities and z-scores associated with the normal curve is to use an online applet. The <a href="http://www.rossmanchance.com/applets/2021/normcalc/NormCalc.html" target="blank">Rossman and Chance Normal Probability Calculator</a> is my preferred applet. It's relatively straightforward to use and would be difficult to demonstrate in these course notes! We will demonstrate this applet in class. I recommend you bookmark any websites you use to find probabilities!
+
+You can also find the area under a normal distribution using a Normal Distribution Table. These are outdated and not used anywhere but the statistics classroom. As a result, I do not teach them.
+
+### R: Normal Distribution Probabilities {-}
+
+Standard normal probabilities of the form $P(Z < z)$ are found using the command 'pnorm(z)'. To find $P(Z<1)$, I would type `pnorm(1)`:
+
+```{r echo=TRUE}
+pnorm(1)
+```
+so $P(Z < 1) = 0.841$. 
+
+A quick note about R: R will print very large numbers and numbers close to 0 using *scientific notation*. However, R's scientific notation may not look the way you're used to! Check out the R output for $P(Z < -5)$:
+
+```{r, echo=TRUE}
+pnorm(-5)
+```
+
+When you see `e-07`, that means $\times10^{-7}$... so $P(Z < -5) = 2.8665 \times 10^{-7} \approx 0.00000029$.
+
+## Working with Normally Distributed Variables
+
+### Normal Distribution Probabilities
+
+Using z-scores and area under the standard normal curve, we can find probabilities for any normal distribution problem!
+
+<center><font size='4'><b>Determining Normal Distribution Probabilities</b></font></center>
+
+1. Sketch the normal curve for the variable.
+2. Shade the region of interest and mark its delimiting x-value(s).
+3. Find the z-score(s) for the value(s).
+4. Use an applet (or the `pnorm` command in R) to find the associated area.
+
+> *Example*: Find the proportion of SAT-takers who score between 1150 and 1300. Assume that SAT scores are approximately normally distributed with mean $\mu=1100$ and standard deviation $\sigma = 200$. 
+>
+> First, let's figure out what we want to calculate. Using area under the curve concepts, the proportion of test-takers who score *between* 1150 and 1300 will be $P(1150 < X < 1300)$.
+> 
+> 1. Sketch:
+
+```{r}
+x <- seq(500,1700)
+y <- dnorm(x,1100,200)
+x1 <- 1150; x2 <- 1300
+plot(x,y,type='l', yaxt='n', ylab="",xlab="") #
+abline(h=0); abline(v=1100); text(x=1500,y=0.0012,"Normal(1100,200)")
+# polygon(x=c(x[x >= 1150 & x <= 1300]), y= c(0, y[x > 1150 & x < 1300], 0), col="mistyrose")
+```
+
+> 2. Shade and label:
+
+```{r}
+x <- seq(500,1700)
+y <- dnorm(x,1100,200)
+x1 <- 1150; x2 <- 1300
+plot(x,y,type='l', yaxt='n', ylab="",xlab="", ylim=c(-0.0002, max(y)+0.0001)) #
+abline(h=0); abline(v=1100)
+polygon(x=c(x[x >= 1150 & x <= 1300]), y= c(0, y[x > 1150 & x < 1300], 0), col="mistyrose")
+text(x=1500,y=0.0012,"Normal(1100,200)")
+text(1150,-0.00015,"1150");text(1300,-0.00015,"1300")
+```
+
+> 3. Calculate z-scores: $$x = 1150 \rightarrow z = \frac{1150-1100}{200} = 0.25$$ and $$x=1300 \rightarrow z = \frac{1300-1100}{200} = 1.$$
+> 4. Use an applet to find $P(Z < 0.25) = 0.599$ and $P(Z < 1) = 0.841$ *or* use the `pnorm` command in R:
+
+```{r echo=TRUE}
+pnorm(0.25)
+pnorm(1)
+```
+
+> Note that $$P(1150 < X < 1300) = P\left(\frac{1150-1100}{200} < Z < \frac{1300-1100}{200}\right) = P(0.25 < Z < 1)$$ and, using cumulative probability concepts, $$P(0.25 < Z < 1) = P(Z < 1) - P(Z < 0.25).$$ We found $P(Z < 0.25) \approx 0.5987$ and $P(Z < 1) \approx 0.8413$, so $$P(Z < 1) - P(Z < 0.25) \approx 0.8413 - 0.5987 = 0.2426.$$ That is, approximately 26.26\% of test-takers score between 1150 and 1300 on the SAT.
+
+### Empirical Rule for Variables
+
+For any (approximately) normally distributed variable,
+
+1. Approximately 68\% of all possible observations lie within one standard deviation of the mean: $\mu \pm \sigma.$
+2. Approximately 95\% of all possible observations lie within two standard deviations of the mean: $\mu \pm 2\sigma.$
+3. Approximately 99.7\% of all possible observations lie within three standard deviations of the mean: $\mu \pm 3\sigma.$
+
+Given some data, you can check if approximately 68\% of the data falls within $\bar{x}\pm s$, 95\% within $\bar{x}\pm 2s$, and 99.7\% within $\bar{x}\pm 3s$ to examine whether the data follow the empirical rule.
+
+Note that a z-score tells us how many standard deviations an observation is from the mean. A positive z-score $z>0$ is *above* the mean; a negative z-score $z<0$ is *below* the mean. 
+
+> *Example*: $z=-0.23$ is 0.23 standard deviations below the mean.
+
+### Percentiles
+
+We can also find the *observation* associated with a percentage/proportion.
+
+The $w$th **percentile** $p_w$ is the observation that is higher than w\% of all observations $$P(X < p_w) = w$$
+
+<center><font size='4'><b>Finding a Percentile</b></font></center>
+
+1. Sketch the normal curve for the variable.
+2. Shade the region of interest and label the area.
+3. Use the applet (or R - see below) to determine the z-score for the area.
+4. Find the x-value using $z$, $\mu$, and $\sigma$.
+
+Note that if $z = \frac{x-\mu}{\sigma}$, then $x = \mu + z\sigma$.
+
+> *Example*: Find the 90th percentile for SAT scores.
+>
+> From the previous example, we know that SAT scores are approximately Normal($\mu=1100$, $\sigma=200$).
+>
+> 1. Sketch the normal curve.
+
+```{r}
+x <- seq(500,1700)
+y <- dnorm(x,1100,200)
+x1 <- 1150; x2 <- 1300
+plot(x,y,type='l', yaxt='n', ylab="",xlab="") #
+abline(h=0); abline(v=1100)
+text(x=1550,y=0.0012,"Normal(1100, 200)")
+# polygon(x=c(x[x >= 1150 & x <= 1300]), y= c(0, y[x > 1150 & x < 1300], 0), col="mistyrose")
+```
+
+> 2. Shade the region of interest and label the area. 
+
+```{r}
+x <- seq(500,1700)
+y <- dnorm(x,1100,200)
+x1 <- 1100 + 200*qnorm(0.9)
+plot(x,y,type='l', yaxt='n', ylab="",xlab="",ylim=c(-0.0002,max(y)+0.0001)) #
+x.coord <- x[x < x1]
+y.coord <- y[x < x1]
+polygon(x=x.coord, y= c(0, y.coord[2:(length(y.coord)-1)], 0), col="mistyrose")
+abline(h=0); abline(v=1100)
+text(x=1550,y=0.0012,"Normal(1100, 200)")
+text(x=940,y=0.0005,"shaded area = 0.9")
+text(x=x1+135,y=-0.00015,"x = 90th percentile")
+```
+
+> 3. Use the applet to determine the z-score for the area. This results in $z = 1.28$. 
+> 4. Find the x-value using $z\approx 1.28$, $\mu=1100$, and $\sigma=200$: $$x = 1100 + 1.28(200) = 1356$$ so 90\% of SAT test-takers score below 1356.
+
+#### R: Normal Distribution Percentiles {-}
+
+Instead of using an applet, we can use the `qnorm` command in R to find the z-score corresponding to a percentile. In this case, we simply enter the percentile of interest *expressed as a proportion* in the `qnorm` command. That is, to find the z score for the 90th percentile, we would enter
+
+```{r echo=TRUE}
+qnorm(0.9)
+```
+
+which gives the same result as the applet in the example above. Then, we can use R as a calculator to find the value of $x$ (recall $\mu=1100$ and $\sigma=200$)
+
+```{r echo=T}
+1100 + 1.281552*200
+```
+
+This gives us the same result as before, that 90\% of SAT test-takers score below 1356.

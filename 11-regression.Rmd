@@ -1,0 +1,223 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Regression and Correlation
+
+## Chapter Overview
+
+We will extend our conversation on descriptive measures for quantitative variables to include the relationship between two variables.
+
+**Chapter Learning Outcomes/Objectives**
+
+1. Calculate and interpret a correlation coefficient.
+2. Calculate and interpret a regression line.
+3. Use a regression line to make predictions.  
+
+## Linear Equations
+
+From your previous math classes, you should have a passing familiarity with linear equations like $y=mx+b$. In statistics, we write these as \[y=b_0 + b_1x\] where $b_0$ and $b_1$ are constants, $x$ is the independent variable, and $y$ is the dependent variable. The graph of a linear function is always a (straight) line. 
+
+The **y-intercept** is $b_0$, the value the dependent variable takes when the independent variable $x=0$. The **slope** is $b_1$, the change in $y$ for a 1-unit change in $x$. 
+
+A **scatterplot** shows the relationship between two (numeric) variables.
+
+```{r}
+plot(mtcars$wt, mtcars$mpg, pch=16,
+     main = "Scatterplot of Car Weight vs MPG",
+     xlab="Weight (1000 lbs)", ylab="Miles Per Gallon")
+```
+
+At a glance, we can see that (in general) heavier cars have lower MPG. We call this type of data **bivariate data**. Now consider
+
+```{r}
+set.seed(0)
+num <- sample(1:30, 10)
+price <- 8 + 3.25*num
+plot(num,price,xlab="Number of Coffees Purchased in a Month", ylab="Amount of Money Spent on Coffee",
+     cex=1.5, pch=16)
+abline(a=8,b=3.25,lwd=1.5)
+```
+
+This relationship can be modeled perfectly with a straight line:
+\[
+y = 8 + 3.25x
+\]
+When we can do this - model a relationship perfectly - we know the exact value of $y$ whenever we know the value of $x$. This is nice (we would love to be able to do this all the time!) but typically data is more complex than this. 
+
+Linear regression takes the idea of fitting a line and allows the relationship to be imperfect. Imagine in the previous scenario that you buy an \$8 pound of coffee each month and individual coffees cost \$3.25... but what if your pound of coffee didn't always cost \$8? Or your coffee drinks didn't always cost \$3.25? In this case, you might get a plot that looks something like this:
+
+```{r}
+set.seed(0)
+num <- sample(1:30, 10)
+price <- 8 + 3.25*num + rnorm(10,0,15)
+plot(num,price,xlab="Number of Coffees Purchased in a Month", ylab="Amount of Money Spent on Coffee",
+     cex=1.5, pch=16)
+```
+
+The linear regression line looks like
+\[
+y = \beta_0 + \beta_1x + \epsilon
+\]
+
+- $\beta$ is the Greek letter "beta".
+- $\beta_0$ and $\beta_1$ are constants.
+- Error (the fact that the points don't all line up perfectly) is represented by $\epsilon$.
+
+Think of this as the 2-dimensional version of a point estimate!
+
+We estimate $\beta_0$ and $\beta_1$ using data and denote the estimated line by 
+\[
+\hat{y} = b_0 + b_1x
+\]
+
+- $\hat{y}$, "y-hat", is the estimated value of $y$.
+- $b_0$ is the estimate for $\beta_0$.
+- $b_1$ is the estimate for $\beta_1$.
+
+We drop the error term $\epsilon$ when we estimate the constants for a regression line; we assume that the mean error is 0, so *on average* we can ignore this error. 
+
+We use a regression line to make predictions about $y$ using values of $x$. 
+
+- $y$ is the **response variable**.
+- $x$ is the **predictor variable**.
+
+> *Example*: (from OpenIntro Statistics 8.1.2) Researchers captured 104 brushtail possums and took a variety of body measurements on each before releasing them back into the wild. We consider two measurements for each possum: total body length and head length.
+
+```{r}
+possum <- source('https://www.openintro.org/data/R/possum.R')
+possum <- possum$value
+plot(possum$total_l, possum$head_l, pch=16, 
+     ylab="Head Length (mm)", xlab="Total Body Length (cm)")
+```
+
+> Clearly, the relationship isn't perfectly linear, but there does appear to be some kind of linear relationship (as body length increases, head length also increases). We want to try to use body length ($x$) to predict head length ($y$).
+>
+> The regression model for these data is $$\hat{y}=42.7 + 0.57x$$
+
+```{r}
+possum <- source('https://www.openintro.org/data/R/possum.R')
+possum <- possum$value
+temp <- summary(lm(possum$head_l ~ possum$total_l))
+plot(possum$total_l, possum$head_l, pch=16, 
+     ylab="Head Length (mm)", xlab="Total Body Length (cm)")
+abline(temp$coefficients[1,1], temp$coefficients[2,1], lwd=2)
+```
+
+> To predict the head length for a possum with a body length of 80cm, we just need to plug in 80 for body length ($x$): $$\hat{y}=42.7 + 0.57(80) = 88.3\text{mm}.$$ Note: because the regression line is built using the data's original units (cm for body length, mm for head length), the regression line will preserve those units. That means that when we plugged in a value in cm, the equation spit out a predicted value in mm. 
+
+## Correlation
+
+We've talked about the strength of linear relationships, but it would be nice to formalize this concept. The **correlation** between two variables describes the strength of their linear relationship. It always takes values between -1 and 1. We denote the correlation (or correlation coefficient) by $R$: $$R = \frac{1}{n-1}\sum_{i=1}^n\left(\frac{x_i - \bar{x}}{s_x}\times\frac{y_i - \bar{y}}{s_y}\right)$$ where $s_x$ and $s_y$ are the respective standard deviations for $x$ and $y$. The sample size $n$ is the total number of $(x,y)$ pairs. 
+
+> *Example*: Consider
+>
+> | $x$ | $y$ |
+> | :-: | :-: |
+> | 1 | 3 |
+> | 2 | 3 | 
+> | 3 | 4 |
+> | $\bar{x} = 2$ | $\bar{y} = 3.333$ |
+> | $s_x = 1$ | $s_y = 0.577$ |
+>
+> Like we did with variance/standard deviation, I recommend using a table to calculate the correlation between $x$ and $y$:
+>
+> | $x - \bar{x}$ | $\frac{x - \bar{x}}{s_x}$ | $y - \bar{y}$ | $\frac{y - \bar{y}}{s_y}$ | $\frac{x - \bar{x}}{s_x}\times\frac{y - \bar{y}}{s_y}$
+> | :-: | :-: | :-: | :-: | :-: |
+> | -1 | -1 | -0.333 | -0.577 | 0.577 |
+> | 0  | 0  | -0.333 | -0.577 | 0.000 |
+> | 1  | 1  | 0.667  | 1.155  | 1.155 | 
+> | | | | | sum = 1.732 |
+>
+> So $R = \frac{1}{3-1}(1.732) = 0.866$
+
+Correlations
+
+- close to -1 suggest strong, negative linear relationships.
+- close to +1 suggest strong, positive linear relationships.
+- close to 0 have little-to-no linear relationship. 
+
+Note: the sign of the correlation will match the sign of the slope!
+
+- If $R < 0$, there is a downward trend and $b_1 < 0$.
+- If $R > 0$, there is an upward trend and $b_1 > 0$.
+- If $R \approx 0$, there is no relationship and $b_1 \approx 0$.
+
+A final note: correlations only represent *linear* trends. Consider the following scatterplot:
+
+```{r}
+x <- -10:10
+y <- x^2
+plot(x,y, type='l', lwd=2); points(x,y, cex = 2, pch=16, col='salmon')
+```
+
+Obviously there's a strong relationship between $x$ and $y$. In fact, there's a perfect relationship here: $y = x^2$. But the *correlation* between $x$ and $y$ is 0! This is one reason why it's important to examine the data both through visual and numeric measures. 
+
+## Finding a Regression Line 
+
+**Residuals** are the leftover *stuff* (variation) in the data after accounting for model fit: $$\text{data} = \text{prediction} + \text{residual}$$ Each observation has its own residual. The residual for an observation $(x,y)$ is the difference between observed ($y$) and predicted ($\hat{y}$): $$e = y - \hat{y}$$ We denote the residuals by $e$ and find $\hat{y}$ by plugging $x$ into the regression equation. If an observation lands above the regression line, $e > 0$. If below, $e < 0$.
+
+When we estimate the parameters for the regression, our goal is to get each residual as close to 0 as possible. We might think to try minimizing $$\sum_{i=1}^n e_i = \sum_{i=1}^n (y_i - \hat{y}_i)$$ but that would just give us very large negative residuals. As with the variance, we will use squares to shift the focus to magnitude:
+\begin{align}
+\sum_{i=1}^n e_i^2 &= \sum_{i=1}^n (y_i - \hat{y}_i)^2 \\
+& = \sum_{i=1}^n [y_i - (b_0 + b_1 x_i)]^2
+\end{align}
+This will allow us to shrink the residuals toward 0: the values $b_0$ and $b_1$ that minimize this will make up our regression line.
+
+This is a calculus-free course, so we'll skip the proof of the minimization part. The slope can be estimated as $$b_1 = \frac{s_y}{s_x}\times R$$ and the intercept as $$b_0 = \bar{y} - b_1 \bar{x}$$
+
+### Coefficient of Determination
+
+With the correlation and regression line in hand, we will add one last piece for considering the fit of a regression line. The **coefficient of determination**, $R^2$, is the square of the correlation coefficient. This value tells us how much of the variability around the regression line is accounted for by the regression. An easy way to interpret this value is to assign it a letter grade. For example, if $R^2 = 0.84$, the predictive capabilities of the regression line get a B. 
+
+> *Example*: Consider two measurements taken on the Old Faithful Geyser in Yellowstone National Park: `eruptions`, the length of each eruption and `waiting`, the time between eruptions. Each is measured in minutes. 
+
+```{r}
+data("faithful")
+plot(faithful$waiting, faithful$eruptions, xlab="Waiting Time", ylab="Eruption Duration")
+```
+
+> There does appear to be some kind of linear relationship here, so we will see if we can use the wait time to predict the eruption duration. The sample statistics for these data are
+>
+> | | `waiting` | `eruptions` |
+> | :-: | :-: | :-: |
+> | mean | $\bar{x}=70.90$ | $\bar{y}=3.49$ |
+> | sd   | $s_x=13.60$ | $s_y=1.14$ |
+> | | | $R = 0.90$ |
+> 
+>  Since we want to use wait time to predict eruption duration, wait time is $x$ and eruption duration is $y.$ Then $$b_1 = \frac{1.14}{13.60}\times 0.90 \approx 0.076 $$ and $$b_0 = 3.49 - 0.076\times 70.90 \approx -1.87$$ so the estimated regression line is $$\hat{y} = -1.87 + 0.076x$$
+>
+> To interpret $b_1$, the slope, we would say that for a one-minute increase in waiting time, we would predict a 0.076 minute increase in eruption duration. The intercept is a little bit trickier. Plugging in 0 for $x$, we get a predicted eruption duration of $-1.87$ minutes. There are two issues with this. First, a negative eruption duration doesn't make sense... but it also doesn't make sense to have a waiting time of 0 minutes. 
+
+It's important to stop and think about our predictions. Sometimes, the numbers don't make sense and it's easy to see that there's something wrong with the prediction. Other times, these issues are more insidious. Usually, all of these issues result from what we call *extrapolation*, applying a model estimate for values outside of the data's range for $x$. Our linear model is only an approximation, and we don't know anything about how the relationship outside of the scope of our data!
+
+Consider the following data with the best fit line drawn on the scatterplot. 
+
+```{r}
+set.seed(1)
+
+x.dat <- runif(100,5,20)
+y.dat <- 2*log(x.dat) + rnorm(100,0,0.4)
+mod <- lm(y.dat ~ x.dat)
+
+plot(x.dat,y.dat, pch=16, xlim=c(5,20), ylab="y", xlab="x"); abline(mod$coefficients[1], mod$coefficients[2], col='red', lwd=3); 
+```
+
+The best fit line is $$\hat{y} = 2.69 + 0.179x$$ and the correlation is $R=0.877$. Then the coefficient of determination is $R^2 = 0.767$ (think: a C grade), so the model has decent predictive capabilities. More precisely, the model accounts for 76.7\% of the variability about the regression line. Now suppose we wanted to predict the value of $y$ when $x=0.1$: $$\hat{y} = 2.66 + 0.181\times0.1 = 2.67$$ This seems like a perfectly reasonable number... But what if I told you that I generated the data using the model $y = 2\ln(x) + \text{random error}$? (If you're not familiar with the natural log, $\ln$, don't worry about it! You won't need to use it.) The true (population) best-fit model would look like this:
+
+```{r}
+set.seed(1)
+x <- seq(from=0.1, to=25, by=0.1)
+y <- 2*log(x)
+
+x.dat <- runif(100,5,20)
+y.dat <- 2*log(x.dat) + rnorm(100,0,0.5)
+mod <- lm(y.dat ~ x.dat)
+
+plot(x,y,type='l', lwd=3, col='red', ylim=c(min(y), max(y.dat))); points(x.dat,y.dat, pch=16); abline(v=5); abline(v=20); 
+  points(x=0.1, y=mod$coefficients[1]+0.1* mod$coefficients[2], pch=16, col='blue'); abline(v=0.1, lty=2)
+```
+
+The vertical lines at $x=5$ and $x=20$ show the bounds of our data. The blue dot at $x=0.1$ is the predicted value $\hat{y}$ based on the linear model. The dashed horizontal line helps demonstrate just how far this estimate is from the true population value! This does *not* mean there's anything inherently wrong with our model. If it works well from $x=5$ to $x=20$, great, it's doing its job! 

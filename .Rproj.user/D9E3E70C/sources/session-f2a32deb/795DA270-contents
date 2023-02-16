@@ -1,0 +1,72 @@
+--- 
+title: "Introduction to Statistics"
+author: "Dr. Lauren Cappiello"
+site: bookdown::bookdown_site
+output:
+  html_document:
+    df_print: paged
+bibliography:
+- book.bib
+- packages.bib
+biblio-style: apalike
+link-citations: yes
+description: Introduction to Statistics. 
+documentclass: book
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Welcome to Statistics! {-}
+
+## Course Learning Outcomes {-}
+
+Students will be able to:
+
+1. Organize, summarize, and interpret data in tabular, graphical, and pictorial formats.
+2. Organize and interpret bivariate data and learn simple linear regression and correlation.
+3. Understand the basic rules of probability.
+4. Use the binomial distribution as a model for discrete variables.
+5. Use the normal distribution as a model for continuous variables.
+6. Apply statistical inference techniques of parameter estimation such as point estimation and confidence interval estimation.
+7. Apply techniques of testing various statistical hypotheses concerning population parameters.
+
+## For the Instructor {-}
+
+Thanks for checking out my Introduction to Statistics text! Sections are designed to be short, easy-to-read introductions to each concept. Some of the more conceptual sections do not have section exercises, but I am working on adding exercises wherever it seems appropriate. The topics and course ordering reflect the department syllabus for the 3-unit Introduction to Statistics at Sacramento State. I am sure there are topics we've left out, but there are only so many things one can cover in 15 weeks. 
+
+Each Chapter is designed to take approximately two weeks of class time. In an ideal world, I would cover at least the first eight in a 15 week semester. However, with assessment, activities, student questions, holidays, etc., I usually get through the first six or seven. Sometimes I introduce regression at the end of Chapter 2. Rarely do I get to ANOVA. Despite the time constraints, I am working on including additional topics. 
+
+This text is a work in progress and gets updated every semester that I each Introduction to Statistics (which is very nearly every semester) and sometimes during winter and summer breaks.
+
+Currently, I am working on 
+
+- overhauling the entire thing to remove some of the examples borrowed from OpenIntro (another great resource) and from Weiss' *Introductory Statistics* from when this was just the typed version of my course notes.
+- adding section exercises and additional topics. 
+- including subsections with brief introductions to R programming.
+
+Note that the problems with the pdf or epub downloads are known issues. I will tackle those when the text is in a more finished state. Currently, it is designed to be viewed fully online (or you can right click and "print page" - save to pdf - to download each chapter individually). 
+
+Please feel free to reach out to me with any questions, comments, or concerns by emailing me at cappiello@csus.edu 
+
+## For the Student {-}
+
+There are a lot of ways to approach an introductory statistics class. Historically, the topics found in this text have been taught in a way that emphasizes hand calculations and the use of tables full of numbers. 
+
+My philosophy is a little different. This class is designed for students who will need to read statistical results and may need to produce basic statistics using a computer. If you go on to be a scientist and need more statistical know how, this course will give you enough background knowledge to take the inevitable next course in statistics. There is plenty of math in this text, but none of these situations require the ability to do that math by hand. 
+
+In many sections, the math is provided and explained but not emphasized. This is intentional. Instead, we focus on the "why"... Why do we care about this topic? Why is this concept important? Why do I run this test when I have that kind of data? ...and we focus on the interpretation. What does this number tell us about an experiment? What can we conclude based on these statistical results?
+
+We see statistics all the time in the media - in the form of graphs, tables, averages, predictions about elections or sports, you name it! Hopefully, by learning the whys and the interpretation, you will finish this text feeling like you can read and understand statistical results when you run into them in the real world. 
+
+### R Programming {-}
+
+This text is designed to teach you introductory statistics with the option to learn some R (a statistical programming language) along the way. As a result, some sections have some introductory material on R. R is an incredibly powerful tool, but we’re going to keep it relatively simple. Using R will save us the headache of doing a lot of calculations by hand.
+
+Since we are only going to use R for a few simple commands, we will run it completely online at the website <a href="https://rdrr.io/snippets/" target="blank">rdrr.io/snippets</a> (bookmark this website!)
+
+For now, you can run R right here in the course notes! This is exactly what you will see on the rdrr.io website. Type in your command and click the green "Run" button. Try running the command `print("Welcome to Statistics!")`. 
+
+<iframe width='100%' height='500' src='https://rdrr.io/snippets/embed/?code=' frameborder='0'></iframe>
+
+If it prints out "Sorry, something went wrong. All I know is:", just press the "Run" button again.

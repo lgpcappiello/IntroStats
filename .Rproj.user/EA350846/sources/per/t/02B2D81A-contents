@@ -1,0 +1,131 @@
+set.seed(0)
+library(onewaytests)
+library(car)
+library(parallel)
+
+########################################################################################
+# function: funct1
+# arguments: n1 and n2, sample sizes for groups 1 and 2, respectively
+#            setting, the data generation setting
+#            param1a, param1b, two parameters for the first dist
+#            param2a, param2b, two parametrs for the second distribution
+# return: data1, a data frame with all of the generated data in one variable and the 
+#         group number (1 or 2) in the other variable
+########################################################################################
+funct1 <- function(n1, n2, setting, param1a, param1b, param2a, param2b){
+  if(setting == 1){
+    x1 <- rnorm(n1, param1a, param1b)
+    x2 <- rnorm(n2, param2a, param2b)
+  }else if(setting == 2){
+    x1 <- rbeta(n1, param1a, param1b)
+    x2 <- rbeta(n2, param2a, param2b)
+  }
+  data1 <- data.frame(x = c(x1,x2), groups = c(rep(1,n1),rep(2,n2)))
+  return(data1)
+}
+
+########################################################################################
+# function: boot.samp
+# arguments: n, the overall sample size (both groups)
+#            n1, the sample size for group 1
+#            dev.all, the collection of all deviances (based on group medians)
+# return: this function randomly shuffles the groups and finds the difference between 
+#         the two group medians (where again the data being passed to this function is 
+#         the collection of deviances).
+########################################################################################
+boot.samp <- function(n, n1, dev.all){
+  ids <- sample(1:n, n, replace=TRUE)
+  samp <- dev.all[ids]
+  return(median(samp[1:n1]) - median(samp[(n1+1):n]))
+}
+
+########################################################################################
+# function: boot.t
+# arguments: dat, the (numeric) data of interest for both groups combined
+#            grp, a variable indicating the groups for the variable dat
+#            B, the number of bootstrap samples to take
+# return: orig.med.dif, the difference in group medians from the original data
+#         all.boot, a vector containing all differences in group medians from the B 
+#         bootstrap samples
+########################################################################################
+boot.t <- function(dat, grp, B){
+  n <- length(dat)
+  # levels (x) where x an object, ex: a factor
+  # levels returns all of the unique factors, which makes the next part easier
+  grps <- levels(as.factor(grp)) 
+  dev1 <- abs(dat[grp == grps[1]] - median(dat[grp == grps[1]]))
+  dev2 <- abs(dat[grp == grps[2]] - median(dat[grp == grps[2]]))
+  med.dif <- median(dev1) - median(dev2) 
+  
+  dev.all <- c(dev1, dev2)
+  n1 <- length(grp[grp == grps[1]]) # ifelse(n%%2 == 0, n/2, (n+1)/2)
+  bootdifs <- replicate(B, boot.samp(n, n1, dev.all))
+  return(list(orig.med.dif = med.dif, all.boot = bootdifs))
+}
+
+########################################################################################
+# function: funct
+# arguments: i, an unused iterator that makes the parallel computing run
+#            n1 and n2, sample sizes for groups 1 and 2, respectively
+#            setting, the data generation setting
+#            B, the number of bootstrap samples to take.
+# return: a vector containing a p-value for (1) the Brown-Forsythe test, (2) Levene's 
+#         test, and (3) the bootstrap test.
+########################################################################################
+funct <- function (i, n1, n2, setting, p1a, p1b=1, p2a, p2b=1, B){ 
+  i
+  #Data generation
+  samp.data <- funct1(n1,n2,setting, p1a, p1b, p2a, p2b) # funct1(size, dat)
+  
+  #Brown-Forsythe Test
+  a <- bf.test(samp.data$x ~ as.factor(samp.data$group), data=samp.data, verbose = FALSE)
+  bf.pval <- a$p.value
+  
+  #Levene's Test
+  b <- leveneTest(samp.data$x ~ as.factor(samp.data$group), data=samp.data)
+  lev.pval <- b$`Pr(>F)`[1]
+  
+  #Bootstrap
+  t1 <- boot.t(samp.data$x, samp.data$groups, B)
+  boot.p.val <- 2*ifelse(t1$orig.med.dif > 0, 
+                         sum(t1$all.boot > t1$orig.med.dif), 
+                         sum(t1$all.boot < t1$orig.med.dif))/B
+  
+  #Return output
+  return(c(bf.pval,lev.pval, boot.p.val))
+}
+
+# setting number and sample sizes can vary, as can parameters
+n1 = n2 = 100
+sett = 2 # setting 1 is normal; setting 2 is beta
+# parameters for first distribution
+p1a = 1
+p1b = 2
+# parameters for second distribution
+p2a = 3
+p2b = 4
+
+# these are set for all simulation settings and will NOT vary
+B = 10000 
+reps = 10000 
+
+# parallel computing to speed up run time:
+ncore <- detectCores()-1
+cl <- makeCluster(ncore, type="FORK")
+strt <- Sys.time()
+p.vals <- parSapply(cl, 1:reps, funct, n1 = n1, n2 = n2, 
+                    setting = sett, p1a, p1b, p2a, p2b, B = B)
+end <- Sys.time()
+stopCluster(cl)
+rm(cl)
+
+# monitor run time 
+runtime <- end-strt
+runtime
+
+# save p-values to a file so we can work with them later
+# the file name automatically saves the setting, parameters, and sample sizes
+p.vals <- t(p.vals)
+filename <- paste("sim_setting",sett,"p1a",p1a,"p1b",p1b,"p2a",p2a,"p2b",p2b,"size",n1,".csv", sep="")
+setwd("~/OneDrive - California State University, Sacramento/Documents/Research Projects/Feini Pek")
+write.csv(p.vals, filename)

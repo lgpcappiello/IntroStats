@@ -1,0 +1,18 @@
+h1:introduction-to-confidence-intervals Introduction to Confidence Intervals
+h2:chapter-overview Chapter Overview
+h2:sampling-distributions Sampling Distributions
+h3:sampling-error Sampling Error
+h3:the-central-limit-theorem The Central Limit Theorem
+h2:developing-confidence-intervals Developing Confidence Intervals
+h3:interpreting-a-confidence-interval Interpreting a Confidence Interval
+h3:exercises Exercises
+h2:other-levels-of-confidence Other Levels of Confidence
+h3:r-finding-critical-values R: Finding Critical Values
+h3:breaking-down-a-confidence-interval Breaking Down a Confidence Interval
+h3:confidence-level-precision-and-sample-size Confidence Level, Precision, and Sample Size
+h3:exercises-1 Exercises
+h2:confidence-intervals-for-a-mean Confidence Intervals for a Mean
+h3:the-t-distribution The T-Distribution
+h3:r-t-critical-values R: T Critical Values
+h2:r-confidence-intevals-for-a-mean R: Confidence Intevals for a Mean
+

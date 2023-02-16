@@ -1,0 +1,158 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Inference for a Proportion
+
+## Chapter Overview
+
+In this chapter, we will continue our discussion on statistical inference with a discussion on hypothesis testing. In hypothesis testing, we take a more active approach to our data by asking questions about population parameters and developing a framework to answer those questions. We will root this discussion in confidence intervals before learning about several other approaches to hypothesis testing. 
+
+**Chapter Learning Outcomes/Objectives**
+
+1. Perform and interpret inference for a population proportion.
+
+**R Objectives**
+
+1. Generate hypothesis tests for a proportion.
+2. Interpret R output for tests of a proportion.
+
+This chapter's outcomes correspond to course outcomes (6) apply statistical inference techniques of parameter estimation such as point estimation and confidence interval estimation and (7) apply techniques of testing various statistical hypotheses concerning population parameters.
+
+## Confidence Intervals for a Proportion
+
+Inference for a proportion is really similar to inference for a mean! It turns out we can apply the Central Limit Theorem to the sampling distribution for a proportion. But wait - isn't our Central Limit Theorem only for means? 
+
+Think back to the binomial distribution (Section 4.3). A binomial experiment is made up of a series of Bernoulli trials, which result in 0s and 1s. If we add up these values, we get the number of successes $x$. If we take the mean of these successes, we get the *proportion* of successes. In short, $\bar{x} = \hat{p}$ and we can work with the sampling distribution for a sample mean!
+
+The mean of a Bernoulli random variable is $\mu = p$ and the standard deviation is $\sigma = \sqrt{p(1-p)}$. So if we apply the Central Limit Theorem, $\hat{p}$ is approximately normally distributed with mean $$\mu_{\hat{p}} = p$$ and standard error $$\sigma_{\hat{p}} = \frac{\sqrt{p(1-p)}}{\sqrt{n}} = \sqrt{\frac{p(1-p)}{n}}$$
+
+Each of the confidence intervals for a mean uses the same logic: $$\text{estimate }\pm\text{ critical value }\times\text{ standard error }$$ Confidence intervals for a proportion will do the same. We do not know the true value of $p$ for the standard error, so we will plug in $\hat{p}$.
+
+<center><font size='4'><b>A $100(1-\alpha)\%$ confidence interval for $p$.</b></font></center>
+
+$$\hat{p}\pm z_{\alpha/2}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$
+
+To use this formula, we need to check that $n\hat{p} > 10$ and $n(1-\hat{p})>10$. (Note that $n\hat{p}$ is the number of successes and $n(1-\hat{p})$ is the number of failures, so this is another way to check this condition!) 
+
+Why? This relies on a normal approximation that does not work well if either of those quantities is less than or equal to 10. (This a topic which we have skipped, but the theory behind it is similar to the theory presented here for why we can use the Central Limit Theorem with proportions.)
+
+> **Example:** Suppose we take a random sample of 27 US households and find that 15 of them have dogs. Find a 95% confidence interval for the proportion of US households with dogs.
+>
+> **Solution:** From the problem statement, $\alpha = 0.05$. Also, $\hat{p} = 15/27 = 0.56$. The number of successes (households with dogs) in the sample is 15 and the number of failures is 12, both greater than 10, so our assumptions are satisfied. 
+> 
+> The critical value is $z_{\alpha/2}$. Using the normal distribution applet with $\alpha = 0.05$, this yields a value of 1.96. Plugging everything in, $$\hat{p}\pm z_{\alpha/2}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}} = 0.56 \pm 1.96\sqrt{\frac{0.56\times0.44}{27}} = 0.37 \pm 0.19$$ or a 95% confidence interval of (0.37, 0.75).
+>
+> Based on our sample, we can be 95% confident that the proportion of US households with dogs is between 0.37 and 0.75. 
+
+## Hypothesis Tests for a Proportion
+
+For a single proportion, the null and alternative hypotheses are
+
+- $H_0: p = p_0$
+- $H_A: p \ne p_0$
+
+We can perform a hypothesis test for $P$ using the confidence interval, critical value, or p-value approach described in Chapter 6. 
+
+**Setting and Assumptions**: $p$ is target parameter, $np_0 > 10$, $n(1-p_0)>10$.
+
+### Confidence Interval Approach
+
+The $100(1-\alpha)\%$ confidence interval for $p$ is $$\hat{p}\pm z_{\alpha/2}\sqrt{\frac{p_0(1-p_0)}{n}}$$ Notice that we use $p_0$ in the standard error and *not* the sample proportion. This is because the standard error is calculated based on the distribution based on the null hypothesis, which says that $p=p_0$. 
+
+Steps:
+
+1. State null and alternative hypotheses.
+2. Decide on significance level $\alpha$. Check assumptions.
+3. Find the critical value. 
+4. Compute confidence interval. 
+5. If the null value is *not* in the confidence interval, reject the null hypothesis. Otherwise, do not reject.
+6. Interpret results in the context of the problem. 
+
+> **Example:** A quick internet search suggests that 38.4% of US households have dogs. Based on the sample described previously, is it reasonable to assume that the internet search is correct? Test at the 0.05 level of signifance using a confidence interval approach.
+>
+> **Solution:** We know from the previous example that $\hat{p} = 0.56$ and $n=27$.
+> 
+> 1. We want to see if the internet search is correct, so the null and alternative hypotheses are $$H_0: p = 0.384$$ $$H_A: p \ne 0.384$$
+> 2. From the problem statement, $\alpha = 0.05$. Also, $np_0 = 27(0.384)=10.4$ and $n(1-p_0)=27(0.616)=16.6$, both greater than 10, so our assumptions are satisfied. 
+> 3. The critical value is $z_{\alpha/2}$. Using the normal distribution applet with $\alpha = 0.05$, this yields a value of 1.96. 
+> 4. Plugging everything in, $$\hat{p}\pm z_{\alpha/2}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}} = 0.56 \pm 1.96\sqrt{\frac{0.37\times0.63}{27}} = 0.56 \pm 0.18$$ or a 95% confidence interval of (0.38, 0.74).
+> 5. The null value is in the interval, so we fail to reject $H_0$.
+> 6. At the 0.05 level of significance, the data provide *insufficient evidence* to conclude that the proportion of US Households with dogs differs from 0.384.
+
+### Critical Value Approach
+
+The critical value is $z_{\alpha/2}$ and the test statistic is $$z = \frac{\hat{p} - p_0}{\sqrt{\frac{p_0(1-p_0)}{n}}}$$ Notice that we plug in $p_0$ for the standard error! This is different from how we dealt with the standard error when calculating confidence intervals outside of a hypothesis testing context.
+
+Steps:
+
+1. State the null and alternative hypotheses.
+2. Determine the significance level $\alpha$. Check assumptions.
+3. Compute the value of the test statistic.
+4. Determine the critical values.
+5. If the test statistic is in the rejection region, reject the null hypothesis. Otherwise, do not reject.
+6. Interpret results.
+
+> **Example:** A quick internet search suggests that 38.4% of US households have dogs. Based on the sample described previously, is it reasonable to assume that the internet search is correct? Test at the 0.05 level of signifance using a critical value approach.
+>
+> **Solution:** We know from a previous example that $\hat{p} = 0.56$ and $n=27$.
+>
+> 1. We want to see if the internet search is correct, so the null and alternative hypotheses are $$H_0: p = 0.384$$ $$H_A: p \ne 0.384$$
+> 2. From the problem statement, $\alpha = 0.05$. Also, $np_0 = 27(0.384)=10.4$ and $n(1-p_0)=27(0.616)=16.6$, both greater than 10, so our assumptions are satisfied.
+> 3. The test statisic is $$z = \frac{\hat{p} - p_0}{\sqrt{\frac{p_0(1-p_0)}{n}}} = \frac{0.56 - 0.384}{\sqrt{\frac{0.384(0.616)}{27}}} = 1.41$$
+> 4. The critical value is $z_{\alpha/2}$. Using the normal distribution applet with $\alpha = 0.05$, this yields a value of 1.96. 
+> 5. The test statistics is *not* in the rejection region, so we fail to reject $H_0$.
+> 6. At the 0.05 level of significance, the data provide *insufficient evidence* to conclude that the proportion of US Households with dogs differs from 0.384.
+
+### P-Value Approach
+
+The p-value is $$2P(Z > |z|)$$ where $z$ is the test statistic described above.
+
+Steps:
+
+1. State the null and alternative hypotheses.
+2. Determine the significance level $\alpha$. Check assumptions.
+3. Compute the value of the test statistic.
+4. Determine the p-value.
+5. If $\text{p-value} < \alpha$, reject the null hypothesis. Otherwise, do not reject.
+6. Interpret results.
+
+> **Example:** A quick internet search suggests that 38.4% of US households have dogs. Based on the sample described previously, is it reasonable to assume that the internet search is correct? Test at the 0.05 level of signifance using a p-value approach.
+>
+> **Solution:** We know from a previous example that $\hat{p} = 0.56$ and $n=27$.
+>
+> 1. We want to see if the internet search is correct, so the null and alternative hypotheses are $$H_0: p = 0.384$$ $$H_A: p \ne 0.384$$
+> 2. From the problem statement, $\alpha = 0.05$. Also, $np_0 = 27(0.384)=10.4$ and $n(1-p_0)=27(0.616)=16.6$, both greater than 10, so our assumptions are satisfied.
+> 3. The test statisic is $$z = \frac{\hat{p} - p_0}{\sqrt{\frac{p_0(1-p_0)}{n}}} = \frac{0.56 - 0.384}{\sqrt{\frac{0.384(0.616)}{27}}} = 1.41$$
+> 4. The p-value is $$2P(Z > |z|) = 2P(Z > 1.41)$$ Using the normal distribution applet, we find this probability to be $2(0.079) = 0.159$.
+> 5. The p-value $= 0.159 > \alpha = 0.05$, so we fail to reject $H_0$.
+> 6. At the 0.05 level of significance, the data provide *insufficient evidence* to conclude that the proportion of US Households with dogs differs from 0.384.
+
+## R: Hypothesis Tests for a Proportion {-}
+
+To generate confidence intervals and hypothesis tests for a proportion, we will use the command `binom.test`. This will give us slightly different results than the z-test we used throughout this chapter, but it is actually going to be more exact! This approach also does not have any limitations on the values $n\hat{p}$ or $np_0$. We use the z-test when working by hand because the exact binomial test is difficult to do on paper. The arguments we need are:
+
+- `x`: the number of successes.
+- `n`: the number of trials.
+- `p`: the null value $p_0$.
+- `conf.level`: the desired confidence level ($1-\alpha$).
+
+Let's continue to use the example seen throughout this chapter. We have a random sample of 27 US households and 15 of them have dogs. We also have the claim that, in fact, 38.4% of US households have dogs. We will use a significance level of $\alpha=0.05$. 
+
+Based on the prompt, there are `x = 15` successes; `n=27` trials; and $p_0=$`p=0.384`. So the R command will look like 
+
+```{r}
+binom.test(x = 15, n = 27, p = 0.384, conf.level = 0.95)
+```
+
+The output shows (top to bottom):
+
+- a summary of the data we entered, along with the null value $p_0$.
+- the test statistic and associated degrees of freedom (we will ignore this part) and the p-value.
+- the alternative hypothesis.
+- a 95% confidence interval for $p$.
+- the sample proportion $\hat{p}$.
+
+Since this is slightly different from the test used when we discussed doing these calculations by hand, when we do hypothesis tests for a proportion using R, we will *not* use the critical value approach. Based on the confidence interval and p-value, at the 0.05 level of significance, the data provide insufficient evidence to conclude that the proportion of US Households with dogs differs from 0.384. (In general, we will come to the same conclusion whether we do these tests by hand or using R.)

@@ -1,0 +1,17 @@
+h1:random-variables Random Variables
+h2:chapter-overview Chapter Overview
+h2:discrete-random-variables Discrete Random Variables
+h3:the-mean-and-standard-deviation The Mean and Standard Deviation
+h2:the-binomial-distribution The Binomial Distribution
+h3:mean-and-variance Mean and Variance
+h3:binomial-probabilities-in-r Binomial Probabilities in R
+h2:the-normal-distribution The Normal Distribution
+h3:the-standard-normal-distribution The Standard Normal Distribution
+h2:area-under-the-standard-normal-curve Area Under the Standard Normal Curve
+h3:r-normal-distribution-probabilities R: Normal Distribution Probabilities
+h2:working-with-normally-distributed-variables Working with Normally Distributed Variables
+h3:normal-distribution-probabilities Normal Distribution Probabilities
+h3:empirical-rule-for-variables Empirical Rule for Variables
+h3:percentiles Percentiles
+h4:r-normal-distribution-percentiles R: Normal Distribution Percentiles
+

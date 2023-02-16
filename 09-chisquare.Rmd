@@ -1,0 +1,32 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Chi-Square Tests
+
+## Chapter Overview
+
+In this chapter, we will continue our discussion on statistical inference with a discussion on hypothesis testing. In hypothesis testing, we take a more active approach to our data by asking questions about population parameters and developing a framework to answer those questions. We will root this discussion in confidence intervals before learning about several other approaches to hypothesis testing. 
+
+**Chapter Learning Outcomes/Objectives**
+
+1. Perform and interpret inference for
+    a. a population variance.
+    b. the ratio of two variances.
+    c. tests of goodness of fit and contingency tables. 
+
+This chapter's outcomes correspond to course outcomes (6) apply statistical inference techniques of parameter estimation such as point estimation and confidence interval estimation and (7) apply techniques of testing various statistical hypotheses concerning population parameters.
+
+## Inference for a Population Variance
+
+Sometimes, it may be of interest to examine directly the variability of a population. Why? Suppose we have some medication that comes in a pill form. We know that each pill has an average of 10mg of active ingredient. For this medication to be consistently effective, we want to make sure that the amount of active ingredient does not *vary* too much from one pill to the next. We examine this using tests for population variance. 
+
+### The Chi-Square Distribution 
+
+## The Ratio of Two Variances
+
+## Goodness of Fit
+
+## Contingency Tables

@@ -1,0 +1,326 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Introduction to Hypothesis Testing
+
+## Chapter Overview
+
+In this chapter, we will continue our discussion on statistical inference with a discussion on hypothesis testing. In hypothesis testing, we take a more active approach to our data by asking questions about population parameters and developing a framework to answer those questions. We will root this discussion in confidence intervals before learning about several other approaches to hypothesis testing. 
+
+**Chapter Learning Outcomes/Objectives**
+
+1. Test one sample means using 
+    a. confidence intervals.
+    b. the critical value approach. 
+    c. the p-value approach.
+
+**R Objectives**
+
+1. Generate hypothesis tests for a mean.
+2. Interpret R output for tests of a mean.
+
+This chapter's outcomes correspond to course outcomes (6) apply statistical inference techniques of parameter estimation such as point estimation and confidence interval estimation and (7) apply techniques of testing various statistical hypotheses concerning population parameters.
+
+## Logic of Hypothesis Testing
+
+This section is framed in terms of questions about a population mean $\mu$, but the same logic applies to $p$ (and other population parameters). 
+
+One of our goals with statistical inference is to make decisions or judgements about the value of a parameter. A confidence interval is a good starting point, but we might also want to ask questions like
+
+- Do cans of soda actually contain 12 oz?
+- Is Medicine A better than Medicine B?
+
+A **hypothesis** is a statement that something is true. A hypothesis test involves two (competing) hypotheses:
+
+1. The **null hypothesis**, denoted $H_0$, is the hypothesis to be tested. This is the "default" assumption.
+2. The **alternative hypothesis**, denoted $H_A$ is the alternative to the null. 
+
+Note that the subscript 0 is "nought" (pronounced "not"). A **hypothesis test** helps us decide whether the null hypothesis should be rejected in favor of the alternative. 
+
+> *Example*: Cans of soda are labeled with "12 FL OZ". Is this accurate? 
+>
+> The default, or uninteresting, assumption is that cans of soda contain 12 oz. 
+>
+> - $H_0$: the mean volume of soda in a can is 12 oz.
+> - $H_A$: the mean volume of soda in a can is NOT 12 oz.
+
+We can write these hypotheses in words (as above) or in statistical notation. The null specifies a single value of $\mu$
+
+- $H_0$: $\mu=\mu_0$
+
+We call $\mu_0$ the **null value**. When we run a hypothesis test, $\mu_0$ will be replaced by some number. For the soda can example, the null value is 12. We would write $H_0: \mu = 12$.
+
+The alternative specifies a *range* of possible values for $\mu$:
+
+- $H_A$: $\mu\ne\mu_0$. "The true mean is different from the null value."
+
+<center><font size='4'>**The Logic of Hypothesis Testing**</center></font>
+
+Take a random sample from the population. If the data area consistent with the null hypothesis, do not reject the null hypothesis. If the data are inconsistent with the null hypothesis *and* supportive of the alternative hypothesis, reject the null in favor of the alternative.  
+
+> *Example*: One way to think about the logic of hypothesis testing is by comparing it to the U.S. court system. In a jury trial, jurors are told to assume the defendant is "innocent until proven guilty". Innocence is the default assumption, so
+> 
+> - $H_0$: the defendant is innocent.
+> - $H_A$: the defendant is guilty.
+>
+> Like in hypothesis testing, it is not the jury's job to decide if the defendant is innocent. That should be their default assumption. They are only there to decide if the defendant is guilty or if there is not enough evidence to override that default assumption. The *burden of proof* lies on the alternative hypothesis. 
+
+Notice the careful language in the logic of hypothesis testing: we either reject, or fail to reject, the null hypothesis. We never "accept" a null hypothesis. 
+
+### Decision Errors
+
+- A **Type I Error** is rejecting the null when it is true. (Null is true, but we conclude null is false.)
+- A **Type II Error** is not rejecting the null when it is false. (Null is false, but we do not conclude it is false.)
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-s7xz{border-color:#ffffff;text-align:left;vertical-align:middle}
+.tg .tg-vhtn{background-color:#ffffff;border-color:#000000;text-align:center;vertical-align:middle}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-s7xz"></th>
+    <th class="tg-s7xz"></th>
+    <th class="tg-vhtn" colspan="2">$H_0$ is</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-s7xz"></td>
+    <td class="tg-s7xz"></td>
+    <td class="tg-vhtn">True</td>
+    <td class="tg-vhtn">False</td>
+  </tr>
+  <tr>
+    <td class="tg-vhtn" rowspan="2">Decision</td>
+    <td class="tg-vhtn">Do not reject $H_0$</td>
+    <td class="tg-vhtn">Correct decision</td>
+    <td class="tg-vhtn">Type II Error</td>
+  </tr>
+  <tr>
+    <td class="tg-vhtn">Reject $H_0$</td>
+    <td class="tg-vhtn">Type I Error</td>
+    <td class="tg-vhtn">Correct decision</td>
+  </tr>
+</tbody>
+</table>
+
+> *Example*: In our jury trial,
+> 
+> - $H_0$: the defendant is innocent.
+> - $H_A$: the defendant is guilty.
+> 
+> A Type I error is concluding guilt when the defendant is innocent. A Type II error is failing to convict when the person is guilty. 
+
+How likely are we to make errors? Well, $P($Type I Error$)=\alpha$, the **significance level**. (Yes, this is the same $\alpha$ we saw in confidence intervals!) For Type II error, $P($Type II Error$)=\beta$. This is related to the sample size calculation from the previous chapter, but is otherwise something we don't have time to cover.
+
+We would like both $\alpha$ and $\beta$ to be small but, like many other things in statistics, there's a trade off! For a fixed sample size, 
+
+- If we decrease $\alpha$, then $\beta$ will increase.
+- If we increase $\alpha$, then $\beta$ will decrease.
+
+In practice, we set $\alpha$ (as we did in confidence intervals). We can improve $\beta$ by increasing sample size. Since resources are finite (we can't get enormous sample sizes all the time), we will need to consider the consequences of each type of error.
+
+> *Example* We could think about assessing consequences through the jury trial example. Consider two possible charges:
+>
+> 1. Defendant is accused of stealing a loaf of bread. If found guilty, they may face some jail time and will have a criminal record.
+> 2. Defendant is accused of murder. If found guilty, they will have a felony and may spend decades in prison. 
+>
+> Since these are moral questions, I will let you consider the consequences of each type of error. However, keep in mind that we do make scientific decisions that have lasting impacts on people's lives. 
+
+<center><font size='4'>**Hypothesis Test Conclusions**</center></font>
+
+- If the null hypothesis is rejected, we say the result is **statistically significant**. We can interpret this result with:
+  - At the $\alpha$ level of significance, the data provide sufficient evidence to support the alternative hypothesis.
+- If the null hypothesis is *not* rejected, we say the result is **not statistically significant**. We can interpret this result with:
+  - At the $\alpha$ level of significance, the data do *not* provide sufficient evidence to support the alternative hypothesis.
+  
+Notice that these conclusions are framed in terms of the alternative hypothesis, which is either supported or not supported. We will *never* conclude the null hypothesis. Finally, when we write these types of conclusions, we will write them in the context of the problem. 
+
+## Confidence Interval Approach to Hypothesis Testing
+
+We can use a confidence interval to help us weigh the evidence against the null hypothesis. A confidence interval gives us a range of *plausible* values for $\mu$. If the null value is in the interval, then $\mu_0$ is a plausible value for $\mu$. If the null value is *not* in the interval, then $\mu_0$ is *not* a plausible value for $\mu$. 
+
+1. State null and alternative hypotheses.
+2. Decide on significance level $\alpha$. Check assumptions (decide which confidence interval setting to use).
+3. Find the critical value. 
+4. Compute confidence interval. 
+5. If the null value is *not* in the confidence interval, reject the null hypothesis. Otherwise, do not reject.
+6. Interpret results in the context of the problem. 
+
+> *Example*: Is the average mercury level in dolphin muslces different from $2.5\mu g/g$? Test at the 0.05 level of significance. A random sample of $19$ dolphins resulted in a mean of $4.4 \mu g/g$ and a standard deviation of $2.3 \mu g/g$.
+>
+> 1. $H_0: \mu = 2.5$ and $H_A: \mu \ne 2.5$.
+> 2. Significance level is $\alpha=0.05$. The value of $\sigma$ is unknown and $n = 19 < 30$, so we are in setting 3.
+> 3. For setting 3, the critical value is $t_{df, \alpha/2}$. Here, $df=n-1=18$ and $\alpha/2 = 0.025$:
+
+```{r echo=TRUE}
+qt(0.025, 18)
+```
+
+> 4. The confidence interval is \begin{align} \bar{x} &\pm t_{df, \alpha/2}\frac{s}{\sqrt{n}} \\ 4.4 &\pm 2.101 \frac{2.3}{\sqrt{19}} \\ 4.4 &\pm 1.109 \end{align} or $(3.29, 5.51)$. 
+> 5. Since the null value, $2.5$, is not in the interval, it is *not* a plausible value for $\mu$ (at the 95\% level of confidence). Therefore we reject the null hypothesis.
+> 6. At the 0.05 level of significance, the data provide sufficient evidence to conclude that the true mean mercury level in dolphin muscles is *greater than* $2.5\mu g/g$. 
+>
+>Note: The alternative hypothesis is "not equal to", but we conclude "greater than" because all of the plausible values in the confidence interval are greater than the null value.
+
+## Critical Value Approach to Hypothesis Testing
+
+We learned about critical values when we discussed confidence intervals. Now, we want to use these values directly in a hypothesis test. We will compare these values to a value based on the data, called a **test statistic**.
+
+Idea: the null is our "default assumption". If the null is true, how likely are we to observe a sample that looks like the one we have? If our sample is very inconsistent with the null hypothesis, we want to reject the null hypothesis. 
+
+### Test statistics
+
+Test statistics are similar to z- and t-scores: $$\text{test statistic} = \frac{\text{point estimate}-\text{null value}}{\text{standard error}}.$$ In fact, they serve a similar function in converting a variable $\bar{X}$ into a distribution we can work with easily. 
+
+- **Large Sample Setting**: $\mu$ is target parameter, $n \ge 30$
+
+$$z = \frac{\bar{x}-\mu_0}{s/\sqrt{n}}$$
+
+- **Small Sample Setting**: $\mu$ is target parameter, $n < 30$
+
+$$t = \frac{\bar{x}-\mu_0}{s/\sqrt{n}}$$
+
+The set of values for the test statistic that cause us to reject $H_0$ is the **rejection region**. The remaining values are the **nonrejection region**. The value that separates these is the critical value!
+
+```{r}
+x <- seq(-3,3,length.out=1000)
+y <- dnorm(x)
+x1 <- -3; x2 <- -qnorm(0.85); x3 <- qnorm(0.85); x4 <- 3
+x.coord <- c(x[x > x1 & x < x2])
+y.coord <- y[x > x1 & x < x2]
+x.coord2 <- c(x[x > x3 & x < x4])
+y.coord2 <- y[x > x3 & x < x4]
+plot(x,y,type='l', xaxt='n', yaxt='n', ylab="",xlab="", ylim=c(-0.02,max(y)+0.01)) #
+abline(h=0); abline(v=1100)
+polygon(x=x.coord, y= c(0, y.coord[2:(length(y.coord)-1)], 0), col="mistyrose")
+polygon(x=x.coord2, y= c(0, y.coord2[2:(length(y.coord)-1)], 0), col="mistyrose")
+text(-1.6,0.03,"Reject"); text(1.6,0.03,"Reject"); text(0,0.1,"Do Not Reject")
+text(x2, 0.-0.015, "-c.v."); text(x3, -0.015, "+c.v.")
+```
+
+Steps:
+
+1. State the null and alternative hypotheses.
+2. Determine the significance level $\alpha$. Check assumptions (decide which setting to use).
+3. Compute the value of the test statistic.
+4. Determine the critical values.
+5. If the test statistic is in the rejection region, reject the null hypothesis. Otherwise, do not reject.
+6. Interpret results. 
+
+> *Example*: Is the average mercury level in dolphin muslces different from $2.5\mu g/g$? Test at the 0.05 level of significance. A random sample of $19$ dolphins resulted in a mean of $4.4 \mu g/g$ and a standard deviation of $2.3 \mu g/g$.
+>
+> 1. $H_0: \mu = 2.5$ and $H_A: \mu \ne 2.5$.
+> 2. Significance level is $\alpha=0.05$. The value of $\sigma$ is unknown and $n = 19 < 30$, so we are in setting 3.
+> 3. The test statistic is \begin{align} t &= \frac{\bar{x}-\mu_0}{s/\sqrt{n}} \\ &= \frac{4.4-2.5}{2.3/\sqrt{19}} \\ &= 3.601 \end{align}
+> 4. The critical value is $t_{df, \alpha/2}$. Here, $df=n-1=18$ and $\alpha/2 = 0.025$:
+
+```{r echo=TRUE}
+qt(0.025, 18)
+```
+
+> 5. The test statistic is in the rejection region, so we will reject the null hypothesis:
+
+```{r}
+x <- seq(-4,4,length.out=1000)
+y <- dt(x,18)
+x1 <- -4; x2 <- -qt(0.975,18); x3 <- qt(0.975,18); x4 <- 4
+ts <- 3.601
+x.coord <- c(x[x > x1 & x < x2])
+y.coord <- y[x > x1 & x < x2]
+x.coord2 <- c(x[x > x3 & x < x4])
+y.coord2 <- y[x > x3 & x < x4]
+plot(x,y,type='l', xaxt='n', yaxt='n', ylab="",xlab="", ylim=c(-0.02,max(y)+0.01)) #
+abline(h=0)
+polygon(x=x.coord, y= c(0, y.coord[2:(length(y.coord)-1)], 0), col="mistyrose")
+polygon(x=x.coord2, y= c(0, y.coord2[2:(length(y.coord2)-1)], 0), col="mistyrose")
+text(-2.6,0.05,"Reject"); text(2.6,0.05,"Reject"); text(0,0.1,"Do Not Reject")
+text(x2, -0.015, "-2.101"); text(x3, -0.015, "2.101"); text(ts, -0.015, "3.601")
+```
+
+> 6. At the 0.05 level of significance, the data provide sufficient evidence to conclude that the true mean mercury level in dolphin muscles is greater than $2.5\mu g/g$. 
+
+Notice that this is the same conclusion we came to when we used the confidence interval approach. These approaches are exactly equivalent!
+
+## P-Value Approach to Hypothesis Testing
+
+If the null hypothesis is true, what is the probability of getting a random sample that is as inconsistent with the null hypothesis as the random sample we got? This probability is called the **p-value**.
+
+> *Example*: Is the average mercury level in dolphin muslces different from $2.5\mu g/g$? Test at the 0.05 level of significance. A random sample of $19$ dolphins resulted in a mean of $4.4 \mu g/g$ and a standard deviation of $2.3 \mu g/g$.
+>
+> Probability of a sample *as inconsistent* as our sample is $P(t_{df} \text{ is as extreme as the test statistic})$. Consider $$P(t_{18} > 3.6) = 0.001$$ but we want to think about the probability of being "as extreme" in *either direction* (either tail), so $$\text{p-value} = 2P(t_{18}>3.6) = 0.002$$
+
+If $\text{p-value} < \alpha$, reject the null hypothesis. Otherwise, do not reject. 
+
+### P-Values 
+
+- **Large Sample Setting**: $\mu$ is target parameter, $n \ge 30$, $$2P(Z > |z|)$$ where $z$ is the test statistic.
+
+- **Small Sample Setting**: $\mu$ is target parameter, $n < 30$, $$2P(t_{df} > |t|)$$ where $t$ is the test statistic.
+
+Note: $|a|$ is the "absolute value" of $a$. The absolute value takes a number and throws away the sign, so $|2|=2$ and $|-3|=3$. 
+
+Steps:
+
+1. State the null and alternative hypotheses.
+2. Determine the significance level $\alpha$. Check assumptions (decide which setting to use).
+3. Compute the value of the test statistic.
+4. Determine the p-value.
+5. If $\text{p-value} < \alpha$, reject the null hypothesis. Otherwise, do not reject.
+6. Interpret results. 
+
+We often use p-values instead of the critical value approach because they are meaningful on their own (they have a direct interpretation).
+
+> *Example*: For the dolphins,
+>
+> 1. $H_0: \mu = 2.5$ and $H_A: \mu \ne 2.5$.
+> 2. Significance level is $\alpha=0.05$. The value of $\sigma$ is unknown and $n = 19 < 30$, so we are in setting 3.
+> 3. The test statistic is \begin{align} t &= \frac{\bar{x}-\mu_0}{s/\sqrt{n}} \\ &= \frac{4.4-2.5}{2.3/\sqrt{19}} \\ &= 3.601 \end{align}
+> 4. The p-value is $$2P(t_{df} > |t|) - 2P(t_{18} > 3.601) = 0.002$$
+> 5. Since $\text{p-value}=0.002 < \alpha=0.05$, reject the null hypothesis.
+> 6. At the 0.05 level of significance, the data provide sufficient evidence to conclude that the true mean mercury level in dolphin muscles is greater than $2.5\mu g/g$. 
+
+As before, this is the same conclusion we came to when we used the confidence interval and critical value approaches. All of these approaches are exactly equivalent. 
+
+## R: Hypothesis Tests for a Mean {-}
+
+To conduct hypothesis tests for a mean in R, we will again use the `t.test` command. The arguments we will use for hypothesis testing are 
+
+- `x`: the variable that contains the data we want to use to construct a confidence interval.
+- `mu`: the null value, $\mu_0$.
+- `conf.level`: the desired confidence level ($1-\alpha$).
+
+We will again to use the `Loblolly` pine tree data.
+
+```{r, echo=TRUE, message=F}
+attach(Loblolly)
+```
+
+Let's test if the average height of Loblolly pines differs from $40$ feet. We will test at a 0.01 level of significance ($\alpha = 0.01$). So $H_0: \mu = 40$ and $H_A: \mu \ne 40$ and the R command will look like
+
+```{r, echo=TRUE}
+t.test(x = height, mu = 40, conf.level = 0.99)
+```
+
+Last time we used this command, we noted that R printed more information than we knew how to handle. That information was about hypothesis tests! The output from this test shows the following (top to bottom):
+
+- the data used in the hypothesis test.
+- the value of the test statistic ($t = -3.3851$), the degrees of freedom ($83$), and the p-value ($0.001$).
+- the alternative hypothesis.
+- the confidence interval.
+- the sample mean.
+
+Based on this output, we have everything we need to conduct a hypothesis test using (A) the confidence interval approach, (B) the critical value approach, or (C) the p-value approach! In practice, we might include results from multiple approaches: At the 0.01 level of significance, there is sufficient evidence to reject the null hypothesis and conclude that the true mean height of Loblolly pines is less than 40 feet ($t = -3.385$, p-value$=0.001$). 
+
+```{r, echo=TRUE, message=F}
+detach(Loblolly)
+```
